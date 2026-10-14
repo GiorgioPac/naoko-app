@@ -8,8 +8,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -29,92 +27,457 @@
       <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-neutral-100 via-neutral-300 to-neutral-400 bg-clip-text text-transparent">Naoko</span>
     </div>
 
-    <!-- Toggle Host/Guest -->
-    <button id="role-toggle" onclick="toggleRole()" class="text-xs px-3 py-1.5 rounded-full border border-neutral-700 bg-neutral-900/80 text-neutral-300 hover:border-amber-500 transition-all flex items-center gap-1.5">
-      <i data-lucide="user" class="w-3.5 h-3.5 text-amber-400"></i>
-      <span id="role-label">Mode: Guest</span>
-    </button>
+    <!-- User / Auth Header Area -->
+    <div id="auth-header-area">
+      <!-- Popolato dinamicamente da JS: pulsante Sign In o Badge Profilo -->
+    </div>
   </header>
 
   <!-- Main Container -->
   <main class="max-w-md mx-auto px-4 pt-5 space-y-6">
 
-    <!-- Hero / Category Filters -->
+    <!-- Categories Filters -->
     <div class="space-y-3">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-extrabold tracking-tight">Happening Tonight</h1>
-        <span class="text-xs text-amber-400 font-medium px-2 py-0.5 rounded-full bg-amber-400/10 border border-amber-400/20">Cloud Live</span>
+        <span class="text-xs text-amber-400 font-medium px-2 py-0.5 rounded-full bg-amber-400/10 border border-amber-400/20">Live</span>
       </div>
 
-      <!-- Categories -->
-      <div class="flex gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
-        <button onclick="filterCategory('All')" class="px-4 py-2 rounded-full bg-neutral-100 text-neutral-950 font-semibold shadow shrink-0">All</button>
-        <button onclick="filterCategory('Cocktail & Bar')" class="px-4 py-2 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Cocktail & Bar</button>
-        <button onclick="filterCategory('Live Music')" class="px-4 py-2 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Live Music</button>
-        <button onclick="filterCategory('Club & DJ Sets')" class="px-4 py-2 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Club & DJ Sets</button>
+      <!-- Category Filter Pills -->
+      <div class="flex gap-2 overflow-x-auto pb-1 text-xs no-scrollbar" id="category-pills">
+        <button onclick="filterCategory('All', this)" class="category-pill px-4 py-2 rounded-full bg-neutral-100 text-neutral-950 font-semibold shadow shrink-0">All</button>
+        <button onclick="filterCategory('Cocktail & Bar', this)" class="category-pill px-4 py-2 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Cocktail & Bar</button>
+        <button onclick="filterCategory('Live Music', this)" class="category-pill px-4 py-2 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Live Music</button>
+        <button onclick="filterCategory('Club & DJ Sets', this)" class="category-pill px-4 py-2 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Club & DJ Sets</button>
+        <button onclick="filterCategory('Art & Culture', this)" class="category-pill px-4 py-2 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Art & Culture</button>
       </div>
     </div>
 
-    <!-- Venue Portal Banner -->
-    <div id="organizer-banner" class="hidden glass p-4 rounded-2xl border-amber-500/30 bg-amber-950/10 space-y-3">
+    <!-- Organizer Banner / Action -->
+    <div id="organizer-banner" class="glass p-4 rounded-2xl border-amber-500/30 bg-amber-950/10 space-y-2">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <i data-lucide="store" class="w-4 h-4 text-amber-400"></i>
-          <span class="text-sm font-semibold text-neutral-200">Venue & Host Portal</span>
+          <span class="text-sm font-semibold text-neutral-200">Host an Event</span>
         </div>
-        <span class="text-[11px] text-amber-400 font-mono">Live DB</span>
+        <span id="role-status-badge" class="text-[11px] text-amber-400 font-medium">Hosts & Venues</span>
       </div>
-      <button onclick="openModal()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 font-bold text-sm shadow-md hover:brightness-110 transition flex items-center justify-center gap-2">
-        <i data-lucide="plus-circle" class="w-4 h-4"></i> Create Live Event
+      <button onclick="handleCreateEventClick()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 font-bold text-sm shadow-md hover:brightness-110 transition flex items-center justify-center gap-2">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i> Create New Event
       </button>
     </div>
 
     <!-- Feed Events Container -->
     <div class="space-y-5" id="events-container">
-      <div class="text-center py-12 text-neutral-500 text-xs">Loading live events from Supabase...</div>
+      <!-- Gli eventi vengono inseriti qui dinamicamente -->
     </div>
 
   </main>
 
-  <!-- Modal Creazione Evento -->
-  <div id="create-modal" class="hidden fixed inset-0 z-50 glass bg-black/80 flex items-end sm:items-center justify-center p-4">
-    <div class="bg-neutral-900 border border-neutral-800 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl">
+  <!-- MODAL: REGISTRAZIONE & LOGIN -->
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 glass bg-black/80 flex items-center justify-center p-4">
+    <div class="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold">New Gathering</h3>
+        <h3 class="text-lg font-bold">Join Naoko</h3>
+        <button onclick="closeAuthModal()" class="text-neutral-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <p class="text-xs text-neutral-400 leading-relaxed">
+        Select your account type to RSVP to private parties, see attendee profiles, or list your venue's events.
+      </p>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="text-neutral-400 block mb-1">Your Name / Venue Name</label>
+          <input type="text" id="auth-name" placeholder="e.g. Elena Rostova or The Velvet Lounge" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div>
+          <label class="text-neutral-400 block mb-1">Account Role</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="role-btn-guest" onclick="selectRole('guest')" class="py-2.5 px-3 rounded-xl border border-amber-500 bg-amber-500/10 text-white font-semibold flex flex-col items-center gap-1 transition">
+              <i data-lucide="user" class="w-4 h-4 text-amber-400"></i>
+              <span>Guest / Partygoer</span>
+            </button>
+            <button type="button" id="role-btn-host" onclick="selectRole('host')" class="py-2.5 px-3 rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-400 font-semibold flex flex-col items-center gap-1 transition">
+              <i data-lucide="store" class="w-4 h-4"></i>
+              <span>Venue / Organizer</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="completeAuth()" class="w-full py-3 rounded-xl bg-amber-500 text-neutral-950 font-bold text-sm shadow hover:brightness-110 transition flex items-center justify-center gap-2">
+        <i data-lucide="arrow-right" class="w-4 h-4"></i> Enter Naoko
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: CREAZIONE EVENTO (Per Host/Organizzatori) -->
+  <div id="create-modal" class="hidden fixed inset-0 z-50 glass bg-black/80 flex items-end sm:items-center justify-center p-4">
+    <div class="bg-neutral-900 border border-neutral-800 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold">Publish New Event</h3>
+          <p class="text-[11px] text-amber-400">Posting as host: <span id="host-name-label"></span></p>
+        </div>
         <button onclick="closeModal()" class="text-neutral-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="text-neutral-400 block mb-1">Event Title</label>
-          <input type="text" id="new-title" placeholder="e.g. Secret Rooftop DJ Set" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+          <label class="text-neutral-400 block mb-1">Event Title *</label>
+          <input type="text" id="new-title" placeholder="e.g. Secret Rooftop Session" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
         </div>
         <div>
-          <label class="text-neutral-400 block mb-1">Venue Name / Location</label>
-          <input type="text" id="new-location" placeholder="e.g. Greenhouse Lounge" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+          <label class="text-neutral-400 block mb-1">Venue / Address *</label>
+          <input type="text" id="new-location" placeholder="e.g. The Greenhouse Rooftop, Via Roma 10" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-neutral-400 block mb-1">Date & Time</label>
+            <label class="text-neutral-400 block mb-1">Date & Time *</label>
             <input type="text" id="new-date" placeholder="Tonight • 10:00 PM" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
           </div>
           <div>
-            <label class="text-neutral-400 block mb-1">Category</label>
+            <label class="text-neutral-400 block mb-1">Category *</label>
             <select id="new-category" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
               <option value="Cocktail & Bar">Cocktail & Bar</option>
               <option value="Live Music">Live Music</option>
               <option value="Club & DJ Sets">Club & DJ Sets</option>
+              <option value="Art & Culture">Art & Culture</option>
             </select>
           </div>
         </div>
         <div>
-          <label class="text-neutral-400 block mb-1">Cover Image URL</label>
-          <input type="text" id="new-cover" value="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+          <label class="text-neutral-400 block mb-1">Cover Image Link (URL)</label>
+          <input type="text" id="new-cover" value="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
         </div>
         <div>
           <label class="text-neutral-400 block mb-1">Description</label>
-          <textarea id="new-desc" rows="2" placeholder="Tell guests what to expect..." class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
+          <textarea id="new-desc" rows="2" placeholder="Music style, dress code, guest list rules..." class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
         </div>
       </div>
 
-      <button id="btn-submit-event" onclick="publishEvent()" class="w-full
+      <button onclick="publishEvent()" class="w-full py-3 rounded-xl bg-amber-500 text-neutral-950 font-bold text-sm shadow hover:brightness-110 transition flex items-center justify-center gap-2">
+        <i data-lucide="check" class="w-4 h-4"></i> Publish Gathering
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 right-0 glass border-t border-neutral-800 px-6 py-2.5 flex justify-around items-center max-w-md mx-auto z-40">
+    <button class="flex flex-col items-center gap-1 text-amber-400">
+      <i data-lucide="compass" class="w-5 h-5"></i>
+      <span class="text-[10px] font-semibold">Feed</span>
+    </button>
+    <button onclick="alert('Map exploration feature coming in the next release!')" class="flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200">
+      <i data-lucide="map" class="w-5 h-5"></i>
+      <span class="text-[10px] font-medium">Explore</span>
+    </button>
+    <button onclick="showProfile()" class="flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200">
+      <i data-lucide="user" class="w-5 h-5"></i>
+      <span class="text-[10px] font-medium">Profile</span>
+    </button>
+  </nav>
+
+  <!-- Script Logico Completo -->
+  <script>
+    // Inizializza o recupera lo stato locale
+    let currentUser = JSON.parse(localStorage.getItem('naoko_user')) || null;
+    let selectedAuthRole = 'guest';
+    let currentFilter = 'All';
+
+    // Eventi di partenza (se non presenti nel local storage)
+    const initialEvents = [
+      {
+        id: '1',
+        title: 'Vinyl Sunset & Botanicals',
+        location: 'The Greenhouse Rooftop',
+        date: 'Tonight • 9:00 PM',
+        category: 'Cocktail & Bar',
+        cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
+        description: 'Curated vinyl sets, botanical cocktail pairings, and terrace open late.',
+        hostName: 'The Greenhouse',
+        attendees: [
+          { name: 'Sarah', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80' },
+          { name: 'Marco', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80' }
+        ]
+      },
+      {
+        id: '2',
+        title: 'Underground Electronic Showcase',
+        location: 'Sub Club Basement',
+        date: 'Saturday • 11:30 PM',
+        category: 'Club & DJ Sets',
+        cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80',
+        description: 'Analog synthesizers and heavy basslines. Limited entry.',
+        hostName: 'Sub Club',
+        attendees: [
+          { name: 'Alex', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80' }
+        ]
+      }
+    ];
+
+    let events = JSON.parse(localStorage.getItem('naoko_events')) || initialEvents;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderAuthHeader();
+      renderEvents();
+      lucide.createIcons();
+    });
+
+    // Renderizza lo stato utente nell'Header
+    function renderAuthHeader() {
+      const area = document.getElementById('auth-header-area');
+      if (currentUser) {
+        area.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-neutral-300 font-semibold">${currentUser.name}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full ${currentUser.role === 'host' ? 'bg-amber-400 text-black font-bold' : 'bg-neutral-800 text-neutral-300'}">
+              ${currentUser.role === 'host' ? 'Host' : 'Guest'}
+            </span>
+            <button onclick="logout()" class="text-neutral-500 hover:text-rose-400 text-xs ml-1" title="Logout">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+      } else {
+        area.innerHTML = `
+          <button onclick="openAuthModal()" class="text-xs px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-700 hover:border-amber-500 text-neutral-200 transition flex items-center gap-1.5">
+            <i data-lucide="log-in" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Sign In</span>
+          </button>
+        `;
+      }
+      lucide.createIcons();
+    }
+
+    // Gestione Creazione Evento con Controllo Ruolo
+    function handleCreateEventClick() {
+      if (!currentUser) {
+        alert("You need an account to create events. Please sign in or register as a Venue/Host!");
+        openAuthModal();
+        selectRole('host');
+        return;
+      }
+
+      if (currentUser.role !== 'host') {
+        alert(`You are currently signed in as a Guest (${currentUser.name}). Only verified Venue / Organizer accounts can publish events.`);
+        return;
+      }
+
+      document.getElementById('host-name-label').innerText = currentUser.name;
+      document.getElementById('create-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    // Pubblica Evento
+    function publishEvent() {
+      const title = document.getElementById('new-title').value.trim();
+      const location = document.getElementById('new-location').value.trim();
+      const date = document.getElementById('new-date').value.trim();
+      const category = document.getElementById('new-category').value;
+      const cover = document.getElementById('new-cover').value.trim();
+      const desc = document.getElementById('new-desc').value.trim();
+
+      if (!title || !location || !date) {
+        alert("Please complete the required fields: Title, Location, and Date.");
+        return;
+      }
+
+      const newEvent = {
+        id: Date.now().toString(),
+        title,
+        location,
+        date,
+        category,
+        cover: cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
+        description: desc,
+        hostName: currentUser.name,
+        attendees: []
+      };
+
+      events.unshift(newEvent);
+      localStorage.setItem('naoko_events', JSON.stringify(events));
+
+      closeModal();
+      document.getElementById('new-title').value = '';
+      document.getElementById('new-location').value = '';
+      document.getElementById('new-date').value = '';
+      document.getElementById('new-desc').value = '';
+
+      renderEvents();
+      alert("Gathering published successfully!");
+    }
+
+    // Partecipazione Evento (Join In)
+    function attendEvent(eventId) {
+      if (!currentUser) {
+        alert("Please sign in or create an account to RSVP to this gathering!");
+        openAuthModal();
+        return;
+      }
+
+      const evt = events.find(e => e.id === eventId);
+      if (!evt) return;
+
+      const alreadyGoing = evt.attendees.some(a => a.name === currentUser.name);
+
+      if (alreadyGoing) {
+        evt.attendees = evt.attendees.filter(a => a.name !== currentUser.name);
+      } else {
+        evt.attendees.push({
+          name: currentUser.name,
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80'
+        });
+      }
+
+      localStorage.setItem('naoko_events', JSON.stringify(events));
+      renderEvents();
+    }
+
+    // Renderizza gli eventi nel feed
+    function renderEvents() {
+      const container = document.getElementById('events-container');
+      const filtered = currentFilter === 'All' ? events : events.filter(e => e.category === currentFilter);
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="glass p-8 rounded-3xl text-center space-y-2">
+            <i data-lucide="calendar-x" class="w-8 h-8 text-neutral-500 mx-auto"></i>
+            <p class="text-sm font-semibold text-neutral-300">No events found in "${currentFilter}"</p>
+            <p class="text-xs text-neutral-500">Be the first host to publish one!</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map(evt => {
+        const isUserGoing = currentUser && evt.attendees.some(a => a.name === currentUser.name);
+
+        return `
+          <div class="glass rounded-3xl overflow-hidden shadow-2xl transition hover:border-neutral-700">
+            <div class="relative h-48 w-full overflow-hidden">
+              <img src="${evt.cover}" alt="Cover" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent"></div>
+              
+              <div class="absolute top-3 left-3 flex gap-2">
+                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full glass text-white">${evt.category}</span>
+              </div>
+
+              <div class="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+                <div>
+                  <p class="text-xs font-semibold text-amber-400 uppercase tracking-wider">${evt.date}</p>
+                  <h2 class="text-xl font-bold leading-tight">${evt.title}</h2>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 space-y-4">
+              <div class="flex items-center justify-between text-xs text-neutral-400">
+                <div class="flex items-center gap-1.5">
+                  <i data-lucide="map-pin" class="w-4 h-4 text-rose-400"></i>
+                  <span class="font-medium text-neutral-200">${evt.location}</span>
+                </div>
+                <span class="text-neutral-500">By ${evt.hostName || 'Verified Host'}</span>
+              </div>
+
+              <p class="text-xs text-neutral-300 leading-relaxed">${evt.description || 'No description provided.'}</p>
+
+              <!-- Attendees Area -->
+              <div class="border-t border-neutral-800/80 pt-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="flex -space-x-2 overflow-hidden">
+                    ${evt.attendees.length > 0 ? evt.attendees.slice(0, 3).map(a => `
+                      <img class="inline-block h-7 w-7 rounded-full ring-2 ring-neutral-900 object-cover" src="${a.avatar}" alt="${a.name}">
+                    `).join('') : '<span class="text-xs text-neutral-500">Nobody yet</span>'}
+                  </div>
+                  <span class="text-xs font-medium text-neutral-400">
+                    ${evt.attendees.length > 0 ? `+${evt.attendees.length} going` : 'Be first to RSVP'}
+                  </span>
+                </div>
+
+                <button onclick="attendEvent('${evt.id}')" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${isUserGoing ? 'bg-emerald-500 text-black' : 'bg-neutral-800 hover:bg-neutral-700 text-white'}">
+                  <i data-lucide="${isUserGoing ? 'check' : 'calendar-plus'}" class="w-3.5 h-3.5"></i>
+                  <span>${isUserGoing ? 'Going ✓' : 'Join In'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // Filtri Categorie
+    function filterCategory(category, btn) {
+      currentFilter = category;
+      document.querySelectorAll('.category-pill').forEach(b => {
+        b.className = 'category-pill px-4 py-2 rounded-full glass text-neutral-400 hover:text-white transition shrink-0';
+      });
+      btn.className = 'category-pill px-4 py-2 rounded-full bg-neutral-100 text-neutral-950 font-semibold shadow shrink-0';
+      renderEvents();
+    }
+
+    // Modal & Auth Logic
+    function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); lucide.createIcons(); }
+    function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+    function closeModal() { document.getElementById('create-modal').classList.add('hidden'); }
+
+    function selectRole(role) {
+      selectedAuthRole = role;
+      const guestBtn = document.getElementById('role-btn-guest');
+      const hostBtn = document.getElementById('role-btn-host');
+
+      if (role === 'guest') {
+        guestBtn.className = "py-2.5 px-3 rounded-xl border border-amber-500 bg-amber-500/10 text-white font-semibold flex flex-col items-center gap-1 transition";
+        guestBtn.querySelector('i').className = "w-4 h-4 text-amber-400";
+        hostBtn.className = "py-2.5 px-3 rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-400 font-semibold flex flex-col items-center gap-1 transition";
+        hostBtn.querySelector('i').className = "w-4 h-4";
+      } else {
+        hostBtn.className = "py-2.5 px-3 rounded-xl border border-amber-500 bg-amber-500/10 text-white font-semibold flex flex-col items-center gap-1 transition";
+        hostBtn.querySelector('i').className = "w-4 h-4 text-amber-400";
+        guestBtn.className = "py-2.5 px-3 rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-400 font-semibold flex flex-col items-center gap-1 transition";
+        guestBtn.querySelector('i').className = "w-4 h-4";
+      }
+      lucide.createIcons();
+    }
+
+    function completeAuth() {
+      const name = document.getElementById('auth-name').value.trim();
+      if (!name) {
+        alert("Please enter a name or venue title.");
+        return;
+      }
+
+      currentUser = {
+        name,
+        role: selectedAuthRole
+      };
+
+      localStorage.setItem('naoko_user', JSON.stringify(currentUser));
+      closeAuthModal();
+      renderAuthHeader();
+      renderEvents();
+      alert(`Welcome, ${name}! You are registered as ${selectedAuthRole === 'host' ? 'Venue / Organizer' : 'Guest'}.`);
+    }
+
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('naoko_user');
+      renderAuthHeader();
+      renderEvents();
+    }
+
+    function showProfile() {
+      if (!currentUser) {
+        openAuthModal();
+      } else {
+        alert(`Profile details:\nName: ${currentUser.name}\nRole: ${currentUser.role === 'host' ? 'Host / Venue' : 'Guest'}`);
+      }
+    }
+  </script>
+</body>
+</html>
