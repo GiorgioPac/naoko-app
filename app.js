@@ -1,7 +1,9 @@
 // Supabase Configuration
 const SUPABASE_URL = "https://rlyrberzchdiyotgellg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Ra9TBazygVyYCnog1eTVMA_1kqvFJf7";
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+const supabaseClient = (typeof window.supabase !== 'undefined' && window.supabase.createClient) 
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) 
+  : null;
 
 // Milan Neighborhood Coordinates
 const DISTRICT_COORDS = {
