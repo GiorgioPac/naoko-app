@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Naoko — Milano Social Gatherings & Venues</title>
+  <title>Naoko — Milan Social Gatherings & Venues</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Leaflet per Mappa -->
+  <!-- Leaflet Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Foglio di stile dedicato -->
+  <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-neutral-950 text-neutral-100 min-h-screen pb-24 selection:bg-amber-500 selection:text-black">
@@ -27,14 +27,14 @@
       <div>
         <div class="flex items-center gap-1.5">
           <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-neutral-100 via-neutral-300 to-neutral-400 bg-clip-text text-transparent">Naoko</span>
-          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">MILANO</span>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">MILAN</span>
         </div>
       </div>
     </div>
     <div id="auth-header-area"></div>
   </header>
 
-  <!-- VISTA 1: FEED EVENTI -->
+  <!-- VIEW 1: EVENT FEED -->
   <main id="view-feed" class="max-w-md mx-auto px-4 pt-5 space-y-6">
 
     <!-- District Selector -->
@@ -42,13 +42,13 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-1.5">
           <i data-lucide="map-pin" class="w-4 h-4 text-rose-500"></i>
-          <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-300">Quartieri di Milano</h2>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-300">Milan Neighborhoods</h2>
         </div>
-        <span class="text-[11px] text-amber-400 font-mono" id="db-status-pill">Milano Live</span>
+        <span class="text-[11px] text-amber-400 font-mono" id="db-status-pill">Cloud Live</span>
       </div>
 
       <div class="flex gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
-        <button onclick="filterDistrict('Tutti', this)" class="district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-950 font-bold shadow shrink-0">Tutti</button>
+        <button onclick="filterDistrict('All', this)" class="district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-950 font-bold shadow shrink-0">All</button>
         <button onclick="filterDistrict('Porta Venezia & NoLo', this)" class="district-pill px-3.5 py-1.5 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Porta Venezia & NoLo</button>
         <button onclick="filterDistrict('Navigli & Darsena', this)" class="district-pill px-3.5 py-1.5 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Navigli & Darsena</button>
         <button onclick="filterDistrict('Isola & Garibaldi', this)" class="district-pill px-3.5 py-1.5 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Isola & Garibaldi</button>
@@ -60,11 +60,11 @@
 
     <!-- Category Filters -->
     <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
-      <button onclick="filterCategory('Tutti', this)" class="category-pill px-3 py-1 rounded-lg bg-neutral-800 text-amber-400 font-semibold shrink-0">Tutte le Categorie</button>
+      <button onclick="filterCategory('All', this)" class="category-pill px-3 py-1 rounded-lg bg-neutral-800 text-amber-400 font-semibold shrink-0">All Categories</button>
       <button onclick="filterCategory('Cocktail Bar & Aperitivo', this)" class="category-pill px-3 py-1 rounded-lg glass text-neutral-400 hover:text-white shrink-0">Cocktail & Aperitivo</button>
       <button onclick="filterCategory('Clubbing & DJ Set', this)" class="category-pill px-3 py-1 rounded-lg glass text-neutral-400 hover:text-white shrink-0">Club & DJ Set</button>
       <button onclick="filterCategory('Live Music & Jazz', this)" class="category-pill px-3 py-1 rounded-lg glass text-neutral-400 hover:text-white shrink-0">Live & Jazz</button>
-      <button onclick="filterCategory('Mostre & Design', this)" class="category-pill px-3 py-1 rounded-lg glass text-neutral-400 hover:text-white shrink-0">Mostre & Design</button>
+      <button onclick="filterCategory('Exhibitions & Design', this)" class="category-pill px-3 py-1 rounded-lg glass text-neutral-400 hover:text-white shrink-0">Exhibitions & Design</button>
     </div>
 
     <!-- Host Banner -->
@@ -72,12 +72,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <i data-lucide="store" class="w-4 h-4 text-amber-400"></i>
-          <span class="text-sm font-semibold text-neutral-200">Sei un locale di Milano?</span>
+          <span class="text-sm font-semibold text-neutral-200">Are you a venue or organizer in Milan?</span>
         </div>
         <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-400/20 text-amber-300">Host Access</span>
       </div>
       <button onclick="handleCreateEventClick()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 font-bold text-sm shadow hover:brightness-110 transition flex items-center justify-center gap-2">
-        <i data-lucide="plus-circle" class="w-4 h-4"></i> Pubblica Evento a Milano
+        <i data-lucide="plus-circle" class="w-4 h-4"></i> Post Event in Milan
       </button>
     </div>
 
@@ -85,71 +85,71 @@
     <div class="space-y-5" id="events-container"></div>
   </main>
 
-  <!-- VISTA 2: MAPPA INTERATTIVA -->
+  <!-- VIEW 2: INTERACTIVE MAP -->
   <main id="view-map" class="hidden fixed inset-0 top-[57px] bottom-[57px] z-10">
     <div id="milano-map" class="w-full h-full"></div>
     <div id="map-preview-card" class="hidden absolute bottom-4 left-4 right-4 max-w-sm mx-auto glass p-3.5 rounded-2xl border border-neutral-700/80 shadow-2xl z-[1000]"></div>
   </main>
 
-  <!-- MODAL: LOGIN / REGISTER -->
+  <!-- MODAL: SIGN IN / REGISTER -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 glass bg-black/80 flex items-center justify-center p-4">
     <div class="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold">Unisciti a Naoko Milano</h3>
+        <h3 class="text-lg font-bold">Join Naoko Milan</h3>
         <button onclick="closeAuthModal()" class="text-neutral-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <p class="text-xs text-neutral-400 leading-relaxed">
-        Scegli se accedere come Partecipante o come Locale / Organizzatore.
+        Sign in as a Guest to RSVP and view attendee lists, or register as a Venue/Host to publish gatherings.
       </p>
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="text-neutral-400 block mb-1">Nome personale o Nome del Locale</label>
-          <input type="text" id="auth-name" placeholder="es. Bar Basso o Marco" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+          <label class="text-neutral-400 block mb-1">Your Name or Venue Name</label>
+          <input type="text" id="auth-name" placeholder="e.g. Bar Basso or Alex" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
         </div>
 
         <div>
-          <label class="text-neutral-400 block mb-1">Ruolo Account</label>
+          <label class="text-neutral-400 block mb-1">Account Role</label>
           <div class="grid grid-cols-2 gap-2">
             <button type="button" id="role-btn-guest" onclick="selectRole('guest')" class="py-2.5 px-2 rounded-xl border border-amber-500 bg-amber-500/10 text-white font-semibold flex flex-col items-center gap-1 transition text-center">
               <i data-lucide="user" class="w-4 h-4 text-amber-400"></i>
-              <span>Partecipante</span>
+              <span>Guest</span>
             </button>
             <button type="button" id="role-btn-host" onclick="selectRole('host')" class="py-2.5 px-2 rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-400 font-semibold flex flex-col items-center gap-1 transition text-center">
               <i data-lucide="store" class="w-4 h-4"></i>
-              <span>Locale / Host</span>
+              <span>Venue / Host</span>
             </button>
           </div>
         </div>
       </div>
 
       <button onclick="completeAuth()" class="w-full py-3 rounded-xl bg-amber-500 text-neutral-950 font-bold text-sm shadow hover:brightness-110 transition flex items-center justify-center gap-2">
-        <i data-lucide="arrow-right" class="w-4 h-4"></i> Entra in Naoko
+        <i data-lucide="arrow-right" class="w-4 h-4"></i> Enter Naoko
       </button>
     </div>
   </div>
 
-  <!-- MODAL: CREA EVENTO -->
+  <!-- MODAL: CREATE EVENT -->
   <div id="create-modal" class="hidden fixed inset-0 z-50 glass bg-black/80 flex items-end sm:items-center justify-center p-4">
     <div class="bg-neutral-900 border border-neutral-800 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-bold">Nuovo Evento a Milano</h3>
-          <p class="text-[11px] text-amber-400">Host: <span id="host-name-label" class="font-semibold"></span></p>
+          <h3 class="text-lg font-bold">New Gathering in Milan</h3>
+          <p class="text-[11px] text-amber-400">Posting as: <span id="host-name-label" class="font-semibold"></span></p>
         </div>
         <button onclick="closeModal()" class="text-neutral-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="text-neutral-400 block mb-1">Titolo dell'Evento *</label>
-          <input type="text" id="new-title" placeholder="es. Rooftop Sunset Beats" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+          <label class="text-neutral-400 block mb-1">Event Title *</label>
+          <input type="text" id="new-title" placeholder="e.g. Rooftop Sunset Beats" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-neutral-400 block mb-1">Quartiere di Milano *</label>
+            <label class="text-neutral-400 block mb-1">District *</label>
             <select id="new-district" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
               <option value="Porta Venezia & NoLo">Porta Venezia & NoLo</option>
               <option value="Navigli & Darsena">Navigli & Darsena</option>
@@ -160,51 +160,51 @@
             </select>
           </div>
           <div>
-            <label class="text-neutral-400 block mb-1">Categoria *</label>
+            <label class="text-neutral-400 block mb-1">Category *</label>
             <select id="new-category" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
-              <option value="Cocktail Bar & Aperitivo">Cocktail & Aperitivo</option>
-              <option value="Clubbing & DJ Set">Club & DJ Set</option>
-              <option value="Live Music & Jazz">Live & Jazz</option>
-              <option value="Mostre & Design">Mostre & Design</option>
+              <option value="Cocktail Bar & Aperitivo">Cocktail Bar & Aperitivo</option>
+              <option value="Clubbing & DJ Set">Clubbing & DJ Set</option>
+              <option value="Live Music & Jazz">Live Music & Jazz</option>
+              <option value="Exhibitions & Design">Exhibitions & Design</option>
             </select>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-neutral-400 block mb-1">Locale & Indirizzo *</label>
-            <input type="text" id="new-location" placeholder="es. Via Lecco 4" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-400 block mb-1">Venue & Address *</label>
+            <input type="text" id="new-location" placeholder="e.g. Via Lecco 4" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
           </div>
           <div>
-            <label class="text-neutral-400 block mb-1">Metro Vicina</label>
-            <input type="text" id="new-metro" placeholder="es. M1 Porta Venezia" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-400 block mb-1">Nearest Metro</label>
+            <input type="text" id="new-metro" placeholder="e.g. M1 Porta Venezia" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-neutral-400 block mb-1">Data & Orario *</label>
-            <input type="text" id="new-date" placeholder="Stasera • 21:00" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-400 block mb-1">Date & Time *</label>
+            <input type="text" id="new-date" placeholder="Tonight • 9:00 PM" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
           </div>
           <div>
             <label class="text-neutral-400 block mb-1">Instagram (@handle)</label>
-            <input type="text" id="new-ig" placeholder="@locale_milano" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <input type="text" id="new-ig" placeholder="@venue_milan" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
           </div>
         </div>
 
         <div>
-          <label class="text-neutral-400 block mb-1">Link Locandina (URL)</label>
+          <label class="text-neutral-400 block mb-1">Cover Image URL</label>
           <input type="text" id="new-cover" value="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
         </div>
 
         <div>
-          <label class="text-neutral-400 block mb-1">Descrizione</label>
-          <textarea id="new-desc" rows="2" placeholder="Dettagli serata, prenotazioni, dress code..." class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
+          <label class="text-neutral-400 block mb-1">Description</label>
+          <textarea id="new-desc" rows="2" placeholder="Music style, reservations, entry policy..." class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
         </div>
       </div>
 
       <button id="btn-publish-submit" onclick="publishEvent()" class="w-full py-3 rounded-xl bg-amber-500 text-neutral-950 font-bold text-sm shadow hover:brightness-110 transition flex items-center justify-center gap-2">
-        <i data-lucide="check" class="w-4 h-4"></i> Pubblica su Milano Feed
+        <i data-lucide="check" class="w-4 h-4"></i> Publish to Milan Feed
       </button>
     </div>
   </div>
@@ -217,15 +217,15 @@
     </button>
     <button id="nav-btn-map" onclick="switchView('map')" class="flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200">
       <i data-lucide="map" class="w-5 h-5"></i>
-      <span class="text-[10px] font-medium">Mappa</span>
+      <span class="text-[10px] font-medium">Map</span>
     </button>
     <button onclick="showProfile()" class="flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200">
       <i data-lucide="user" class="w-5 h-5"></i>
-      <span class="text-[10px] font-medium">Profilo</span>
+      <span class="text-[10px] font-medium">Profile</span>
     </button>
   </nav>
 
-  <!-- Collegamento allo script esterno -->
+  <!-- External Script -->
   <script src="app.js"></script>
 </body>
 </html>
