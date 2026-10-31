@@ -26,7 +26,7 @@ let events = [];
 document.addEventListener("DOMContentLoaded", () => {
   renderAuthHeader();
   fetchEventsFromCloud();
-  lucide.createIcons();
+  if (window.lucide) lucide.createIcons();
 });
 
 // 1. Fetch Events from Supabase
@@ -35,13 +35,13 @@ async function fetchEventsFromCloud() {
   const statusPill = document.getElementById('db-status-pill');
   if (statusPill) statusPill.innerText = "Syncing...";
 
-  if (!supabase) {
+  if (!supabaseClient) {
     console.error("Supabase client not initialized");
     return;
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('events')
       .select('*')
       .order('created_at', { ascending: false });
@@ -107,7 +107,7 @@ async function publishEvent() {
   submitBtn.innerText = "Uploading to Cloud...";
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('events')
       .insert([{
         title: title,
@@ -163,7 +163,7 @@ function renderEvents() {
         <p class="text-xs text-neutral-500">Pick another neighborhood or host the first gathering!</p>
       </div>
     `;
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
     return;
   }
 
@@ -223,7 +223,7 @@ function renderEvents() {
     `;
   }).join('');
 
-  lucide.createIcons();
+  if (window.lucide) lucide.createIcons();
 }
 
 // 4. RSVP Handling
@@ -272,11 +272,11 @@ function switchView(view) {
     navFeed.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200";
     initOrResizeMap();
   }
-  lucide.createIcons();
+  if (window.lucide) lucide.createIcons();
 }
 
 function initOrResizeMap() {
-  if (!mapInstance) {
+  if (!mapInstance && typeof L !== 'undefined') {
     mapInstance = L.map('milano-map', { zoomControl: false }).setView([45.4654, 9.1859], 13);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap &copy; CARTO',
@@ -286,13 +286,15 @@ function initOrResizeMap() {
   }
 
   setTimeout(() => {
-    mapInstance.invalidateSize();
-    updateMapMarkers();
+    if (mapInstance) {
+      mapInstance.invalidateSize();
+      updateMapMarkers();
+    }
   }, 200);
 }
 
 function updateMapMarkers() {
-  if (!mapInstance) return;
+  if (!mapInstance || typeof L === 'undefined') return;
   mapMarkers.forEach(m => mapInstance.removeLayer(m));
   mapMarkers = [];
 
@@ -374,7 +376,7 @@ function renderAuthHeader() {
       </button>
     `;
   }
-  lucide.createIcons();
+  if (window.lucide) lucide.createIcons();
 }
 
 function handleCreateEventClick() {
@@ -390,10 +392,10 @@ function handleCreateEventClick() {
   }
   document.getElementById('host-name-label').innerText = currentUser.name;
   document.getElementById('create-modal').classList.remove('hidden');
-  lucide.createIcons();
+  if (window.lucide) lucide.createIcons();
 }
 
-function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); lucide.createIcons(); }
+function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); if (window.lucide) lucide.createIcons(); }
 function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 function closeModal() { document.getElementById('create-modal').classList.add('hidden'); }
 
@@ -413,7 +415,7 @@ function selectRole(role) {
     guestBtn.className = "py-2.5 px-2 rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-400 font-semibold flex flex-col items-center gap-1 transition text-center";
     guestBtn.querySelector('i').className = "w-4 h-4";
   }
-  lucide.createIcons();
+  if (window.lucide) lucide.createIcons();
 }
 
 function completeAuth() {
