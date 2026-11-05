@@ -14,8 +14,8 @@ const DISTRICT_COORDS = {
   'Lambrate': [45.4842, 9.2384]
 };
 
-let currentUserProfile = null; // Profilo Supabase attivo
-let authMode = 'signup'; // 'signup' oppure 'signin'
+let currentUserProfile = null;
+let authMode = 'signup';
 let selectedAuthRole = 'guest';
 let currentDistrictFilter = 'All';
 let currentCategoryFilter = 'All';
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (window.lucide) lucide.createIcons();
 });
 
-// 1. Sessione & Profilo Reale da Supabase
+// 1. Sessione & Profilo
 async function initSession() {
   if (!supabaseClient) return;
 
@@ -125,7 +125,7 @@ async function fetchEventsFromCloud() {
   }
 }
 
-// 3. Gestione Modalità Autenticazione (Sign Up vs Log In)
+// 3. Autenticazione (Sign Up & Log In)
 function switchAuthMode(mode) {
   authMode = mode;
   const tabSignup = document.getElementById('auth-tab-signup');
@@ -188,14 +188,35 @@ async function submitAuth() {
           }]);
 
         if (profileError) throw profileError;
-        alert(`Account created successfully as ${selectedAuthRole === 'host' ? 'Venue / Host' : 'Guest'}!`);
+
+        currentUserProfile = {
+          id: authData.user.id,
+          email: email,
+          display_name: name,
+          role: selectedAuthRole,
+          instagram_handle: instagram || null,
+          avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80'
+        };
       }
     } else {
-      const { error: loginError } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (loginError) throw loginError;
+
+      if (loginData.user) {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('id', loginData.user.id)
+          .single();
+
+        if (profile) currentUserProfile = profile;
+      }
     }
 
     closeAuthModal();
+    renderAuthHeader();
+    renderEvents();
+
   } catch (err) {
     alert("Authentication error: " + err.message);
   } finally {
@@ -208,9 +229,9 @@ async function logout() {
   currentUserProfile = null;
   renderAuthHeader();
   renderEvents();
+  switchView('feed');
 }
 
-// 4. Selezione Ruolo (Guest vs Host con fix illuminazione)
 function selectRole(role) {
   selectedAuthRole = role;
   const guestBtn = document.getElementById('role-btn-guest');
@@ -228,7 +249,7 @@ function selectRole(role) {
   }
 }
 
-// 5. Geocoding Indirizzi Reali di Milano
+// 4. Geocoding & Pubblicazione
 async function geocodeMilanAddress(address, fallbackDistrict) {
   const baseCoords = DISTRICT_COORDS[fallbackDistrict] || [45.4642, 9.1900];
   try {
@@ -247,7 +268,6 @@ async function geocodeMilanAddress(address, fallbackDistrict) {
   ];
 }
 
-// 6. Pubblicazione Evento Cloud
 async function publishEvent() {
   const title = document.getElementById('new-title').value.trim();
   const district = document.getElementById('new-district').value;
@@ -308,7 +328,7 @@ async function publishEvent() {
   }
 }
 
-// 7. Render Feed ed Eventi
+// 5. Render Feed & RSVP (Risoluzione bug tasto Join In)
 function renderEvents() {
   const container = document.getElementById('events-container');
   const filtered = events.filter(e => {
@@ -388,7 +408,6 @@ function renderEvents() {
   if (window.lucide) lucide.createIcons();
 }
 
-// 8. RSVP Gestione Presenze Cloud
 async function attendEvent(eventId) {
   if (!currentUserProfile) {
     alert("Please sign in or create an account to RSVP!");
@@ -418,7 +437,7 @@ async function attendEvent(eventId) {
       }]);
 
     if (error) {
-      console.error("RSVP error:", error);
+      alert("RSVP error: " + error.message);
       return;
     }
 
@@ -434,28 +453,66 @@ async function attendEvent(eventId) {
   if (mapInstance) showMapPreview(evt);
 }
 
-// 9. Views & Mappa
+// 6. Navigation (Feed, Map, Profile Page)
 function switchView(view) {
   const feedView = document.getElementById('view-feed');
   const mapView = document.getElementById('view-map');
+  const profileView = document.getElementById('view-profile');
+  
   const navFeed = document.getElementById('nav-btn-feed');
   const navMap = document.getElementById('nav-btn-map');
+  const navProfile = document.getElementById('nav-btn-profile');
+
+  // Nascondi tutto
+  feedView.classList.add('hidden');
+  mapView.classList.add('hidden');
+  profileView.classList.add('hidden');
+  
+  navFeed.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200";
+  navMap.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200";
+  if (navProfile) navProfile.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200";
 
   if (view === 'feed') {
     feedView.classList.remove('hidden');
-    mapView.classList.add('hidden');
     navFeed.className = "flex flex-col items-center gap-1 text-amber-400";
-    navMap.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200";
-  } else {
-    feedView.classList.add('hidden');
+  } else if (view === 'map') {
     mapView.classList.remove('hidden');
     navMap.className = "flex flex-col items-center gap-1 text-amber-400";
-    navFeed.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200";
     initOrResizeMap();
+  } else if (view === 'profile') {
+    if (!currentUserProfile) {
+      openAuthModal();
+      return;
+    }
+    renderProfilePage();
+    profileView.classList.remove('hidden');
+    if (navProfile) navProfile.className = "flex flex-col items-center gap-1 text-amber-400";
   }
+
   if (window.lucide) lucide.createIcons();
 }
 
+function renderProfilePage() {
+  if (!currentUserProfile) return;
+  document.getElementById('profile-name').innerText = currentUserProfile.display_name;
+  document.getElementById('profile-email').innerText = currentUserProfile.email;
+  document.getElementById('profile-instagram').innerText = currentUserProfile.instagram_handle || 'Not connected';
+  
+  const badge = document.getElementById('profile-role-badge');
+  const desc = document.getElementById('profile-type-desc');
+  
+  if (currentUserProfile.role === 'host') {
+    badge.className = "text-xs px-3 py-1 rounded-full bg-amber-400 text-black font-bold";
+    badge.innerText = "Venue / Host";
+    desc.innerText = "Event Organizer in Milan";
+  } else {
+    badge.className = "text-xs px-3 py-1 rounded-full bg-neutral-800 text-amber-400 font-semibold";
+    badge.innerText = "Guest";
+    desc.innerText = "Standard Participant";
+  }
+}
+
+// 7. Mappa Interattiva
 function initOrResizeMap() {
   if (!mapInstance && typeof L !== 'undefined') {
     mapInstance = L.map('milano-map', { zoomControl: false }).setView([45.4654, 9.1859], 13);
@@ -530,7 +587,7 @@ function flyToDistrict(district) {
   }
 }
 
-// 10. Filtri & Header
+// 8. Filtri & Header
 function filterDistrict(district, btn) {
   currentDistrictFilter = district;
   document.querySelectorAll('.district-pill').forEach(b => {
@@ -582,7 +639,7 @@ function handleCreateEventClick() {
     return;
   }
   if (currentUserProfile.role !== 'host') {
-    alert(`You are currently signed in as a Guest (${currentUserProfile.display_name}). Only verified Venue / Host accounts can post gatherings.`);
+    alert(`You are signed in as a Guest (${currentUserProfile.display_name}). Only verified Venue / Host accounts can post gatherings.`);
     return;
   }
   document.getElementById('host-name-label').innerText = currentUserProfile.display_name;
@@ -595,9 +652,5 @@ function closeAuthModal() { document.getElementById('auth-modal').classList.add(
 function closeModal() { document.getElementById('create-modal').classList.add('hidden'); }
 
 function showProfile() {
-  if (!currentUserProfile) {
-    openAuthModal();
-  } else {
-    alert(`Naoko Profile:\nName: ${currentUserProfile.display_name}\nEmail: ${currentUserProfile.email}\nInstagram: ${currentUserProfile.instagram_handle || 'Not connected'}\nRole: ${currentUserProfile.role === 'host' ? 'Host / Venue' : 'Guest'}`);
-  }
+  switchView('profile');
 }
