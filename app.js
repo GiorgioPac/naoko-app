@@ -135,14 +135,14 @@ function switchAuthMode(mode) {
   const title = document.getElementById('auth-modal-title');
 
   if (mode === 'signup') {
-    tabSignup.className = "flex-1 py-1.5 rounded-lg bg-neutral-800 text-white font-semibold transition";
-    tabSignin.className = "flex-1 py-1.5 rounded-lg text-neutral-400 hover:text-white font-semibold transition";
+    tabSignup.className = "flex-1 py-1.5 rounded-lg bg-black text-white font-semibold transition";
+    tabSignin.className = "flex-1 py-1.5 rounded-lg text-neutral-500 hover:text-black font-semibold transition";
     signupFields.classList.remove('hidden');
     submitBtn.innerHTML = `<i data-lucide="arrow-right" class="w-4 h-4"></i> Create Account`;
     title.innerText = "Join Naoko Milan";
   } else {
-    tabSignin.className = "flex-1 py-1.5 rounded-lg bg-neutral-800 text-white font-semibold transition";
-    tabSignup.className = "flex-1 py-1.5 rounded-lg text-neutral-400 hover:text-white font-semibold transition";
+    tabSignin.className = "flex-1 py-1.5 rounded-lg bg-black text-white font-semibold transition";
+    tabSignup.className = "flex-1 py-1.5 rounded-lg text-neutral-500 hover:text-black font-semibold transition";
     signupFields.classList.add('hidden');
     submitBtn.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Log In`;
     title.innerText = "Welcome Back";
@@ -237,8 +237,8 @@ function selectRole(role) {
   const guestBtn = document.getElementById('role-btn-guest');
   const hostBtn = document.getElementById('role-btn-host');
 
-  const activeClasses = "py-2.5 px-2 rounded-xl border border-amber-500 bg-amber-500/10 text-white font-semibold flex flex-col items-center gap-1 transition text-center";
-  const inactiveClasses = "py-2.5 px-2 rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-400 font-semibold flex flex-col items-center gap-1 transition text-center";
+  const activeClasses = "py-2.5 px-2 rounded-xl border-2 border-black bg-neutral-100 text-black font-bold flex flex-col items-center gap-1 transition text-center";
+  const inactiveClasses = "py-2.5 px-2 rounded-xl border border-neutral-200 bg-white text-neutral-400 font-semibold flex flex-col items-center gap-1 transition text-center";
 
   if (role === 'guest') {
     guestBtn.className = activeClasses;
@@ -328,7 +328,7 @@ async function publishEvent() {
   }
 }
 
-// 5. Render Feed & RSVP (Risoluzione bug tasto Join In)
+// 5. Render Feed & RSVP (Stile Hinge Bianco & Nero)
 function renderEvents() {
   const container = document.getElementById('events-container');
   const filtered = events.filter(e => {
@@ -339,9 +339,9 @@ function renderEvents() {
 
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div class="glass p-8 rounded-3xl text-center space-y-2">
-        <i data-lucide="map-pin-off" class="w-8 h-8 text-neutral-500 mx-auto"></i>
-        <p class="text-sm font-semibold text-neutral-300">No events found for these filters</p>
+      <div class="bg-neutral-50 border border-neutral-200 p-8 rounded-3xl text-center space-y-2">
+        <i data-lucide="map-pin-off" class="w-8 h-8 text-neutral-400 mx-auto"></i>
+        <p class="text-sm font-bold text-neutral-800">No events found for these filters</p>
         <p class="text-xs text-neutral-500">Pick another neighborhood or host the first gathering!</p>
       </div>
     `;
@@ -353,49 +353,49 @@ function renderEvents() {
     const isUserGoing = currentUserProfile && evt.attendees.some(a => a.userId === currentUserProfile.id);
 
     return `
-      <div class="glass rounded-3xl overflow-hidden shadow-2xl transition hover:border-neutral-700">
-        <div class="relative h-48 w-full overflow-hidden">
+      <div class="bg-white border border-neutral-200 rounded-3xl overflow-hidden shadow-sm transition hover:border-neutral-400">
+        <div class="relative h-52 w-full overflow-hidden">
           <img src="${evt.cover}" alt="Cover" class="w-full h-full object-cover">
-          <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
           
           <div class="absolute top-3 left-3 flex gap-1.5 flex-wrap">
-            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full glass text-amber-300 border border-amber-400/20">${evt.district}</span>
-            <span class="text-[10px] font-semibold px-2 py-1 rounded-full glass text-neutral-300">${evt.category}</span>
+            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white text-black shadow-sm">${evt.district}</span>
+            <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-black/70 text-white backdrop-blur-sm">${evt.category}</span>
           </div>
 
-          <div class="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+          <div class="absolute bottom-3 left-4 right-4 flex items-end justify-between text-white">
             <div>
-              <p class="text-xs font-semibold text-amber-400 uppercase tracking-wider">${evt.date}</p>
-              <h2 class="text-xl font-bold leading-tight">${evt.title}</h2>
+              <p class="text-[11px] font-bold uppercase tracking-wider text-neutral-300">${evt.date}</p>
+              <h2 class="text-xl font-extrabold leading-tight">${evt.title}</h2>
             </div>
           </div>
         </div>
 
         <div class="p-4 space-y-3.5">
-          <div class="flex items-center justify-between text-xs text-neutral-400">
+          <div class="flex items-center justify-between text-xs text-neutral-500">
             <div class="flex items-center gap-1.5 truncate">
-              <i data-lucide="map-pin" class="w-4 h-4 text-rose-400 shrink-0"></i>
-              <span class="font-medium text-neutral-200 truncate">${evt.location}</span>
-              ${evt.metro ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">${evt.metro}</span>` : ''}
+              <i data-lucide="map-pin" class="w-4 h-4 text-black shrink-0"></i>
+              <span class="font-bold text-neutral-900 truncate">${evt.location}</span>
+              ${evt.metro ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200 font-mono">${evt.metro}</span>` : ''}
             </div>
-            ${evt.instagram ? `<span class="text-neutral-400 text-[11px] font-mono shrink-0">${evt.instagram}</span>` : ''}
+            ${evt.instagram ? `<span class="text-neutral-500 text-[11px] font-mono shrink-0">${evt.instagram}</span>` : ''}
           </div>
 
-          <p class="text-xs text-neutral-300 leading-relaxed">${evt.description || 'No description provided.'}</p>
+          <p class="text-xs text-neutral-600 leading-relaxed">${evt.description || 'No description provided.'}</p>
 
-          <div class="border-t border-neutral-800/80 pt-3 flex items-center justify-between">
+          <div class="border-t border-neutral-100 pt-3 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="flex -space-x-2 overflow-hidden">
                 ${evt.attendees.length > 0 ? evt.attendees.slice(0, 3).map(a => `
-                  <img title="${a.name} ${a.instagram ? '(' + a.instagram + ')' : ''}" class="inline-block h-7 w-7 rounded-full ring-2 ring-neutral-900 object-cover cursor-pointer" src="${a.avatar}" alt="${a.name}">
-                `).join('') : '<span class="text-xs text-neutral-500">No RSVPs yet</span>'}
+                  <img title="${a.name} ${a.instagram ? '(' + a.instagram + ')' : ''}" class="inline-block h-7 w-7 rounded-full ring-2 ring-white object-cover cursor-pointer" src="${a.avatar}" alt="${a.name}">
+                `).join('') : '<span class="text-xs text-neutral-400">No RSVPs yet</span>'}
               </div>
-              <span class="text-xs font-medium text-neutral-400">
+              <span class="text-xs font-medium text-neutral-500">
                 ${evt.attendees.length > 0 ? `+${evt.attendees.length} going` : 'Be the first'}
               </span>
             </div>
 
-            <button onclick="attendEvent('${evt.id}')" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${isUserGoing ? 'bg-emerald-500 text-black' : 'bg-neutral-800 hover:bg-neutral-700 text-white'}">
+            <button onclick="attendEvent('${evt.id}')" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${isUserGoing ? 'bg-neutral-100 text-black border border-black' : 'bg-black hover:bg-neutral-800 text-white'}">
               <i data-lucide="${isUserGoing ? 'check' : 'calendar-plus'}" class="w-3.5 h-3.5"></i>
               <span>${isUserGoing ? 'Going ✓' : 'Join In'}</span>
             </button>
@@ -463,21 +463,20 @@ function switchView(view) {
   const navMap = document.getElementById('nav-btn-map');
   const navProfile = document.getElementById('nav-btn-profile');
 
-  // Nascondi tutto
   feedView.classList.add('hidden');
   mapView.classList.add('hidden');
   profileView.classList.add('hidden');
   
-  navFeed.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200";
-  navMap.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200";
-  if (navProfile) navProfile.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200";
+  navFeed.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-black";
+  navMap.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-black";
+  if (navProfile) navProfile.className = "flex flex-col items-center gap-1 text-neutral-400 hover:text-black";
 
   if (view === 'feed') {
     feedView.classList.remove('hidden');
-    navFeed.className = "flex flex-col items-center gap-1 text-amber-400";
+    navFeed.className = "flex flex-col items-center gap-1 text-black font-bold";
   } else if (view === 'map') {
     mapView.classList.remove('hidden');
-    navMap.className = "flex flex-col items-center gap-1 text-amber-400";
+    navMap.className = "flex flex-col items-center gap-1 text-black font-bold";
     initOrResizeMap();
   } else if (view === 'profile') {
     if (!currentUserProfile) {
@@ -486,7 +485,7 @@ function switchView(view) {
     }
     renderProfilePage();
     profileView.classList.remove('hidden');
-    if (navProfile) navProfile.className = "flex flex-col items-center gap-1 text-amber-400";
+    if (navProfile) navProfile.className = "flex flex-col items-center gap-1 text-black font-bold";
   }
 
   if (window.lucide) lucide.createIcons();
@@ -502,11 +501,11 @@ function renderProfilePage() {
   const desc = document.getElementById('profile-type-desc');
   
   if (currentUserProfile.role === 'host') {
-    badge.className = "text-xs px-3 py-1 rounded-full bg-amber-400 text-black font-bold";
+    badge.className = "text-xs px-3 py-1 rounded-full bg-black text-white font-bold";
     badge.innerText = "Venue / Host";
     desc.innerText = "Event Organizer in Milan";
   } else {
-    badge.className = "text-xs px-3 py-1 rounded-full bg-neutral-800 text-amber-400 font-semibold";
+    badge.className = "text-xs px-3 py-1 rounded-full bg-neutral-100 text-black border border-neutral-300 font-semibold";
     badge.innerText = "Guest";
     desc.innerText = "Standard Participant";
   }
@@ -543,7 +542,7 @@ function updateMapMarkers() {
     const customIcon = L.divIcon({
       className: 'custom-pin',
       html: `
-        <div class="w-8 h-8 rounded-full bg-amber-500 border-2 border-black flex items-center justify-center text-black font-extrabold shadow-lg shadow-amber-500/50 hover:scale-110 transition cursor-pointer">
+        <div class="w-8 h-8 rounded-full bg-black border-2 border-white flex items-center justify-center text-white font-extrabold shadow-lg hover:scale-110 transition cursor-pointer">
           <span class="text-xs">N</span>
         </div>
       `,
@@ -563,11 +562,11 @@ function showMapPreview(evt) {
     <div class="flex gap-3 items-center">
       <img src="${evt.cover}" class="w-16 h-16 rounded-xl object-cover shrink-0" />
       <div class="flex-1 min-w-0">
-        <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">${evt.district}</span>
-        <h4 class="text-sm font-bold truncate text-white">${evt.title}</h4>
-        <p class="text-xs text-neutral-400 truncate">${evt.location}</p>
+        <span class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">${evt.district}</span>
+        <h4 class="text-sm font-bold truncate text-black">${evt.title}</h4>
+        <p class="text-xs text-neutral-500 truncate">${evt.location}</p>
       </div>
-      <button onclick="attendEvent('${evt.id}')" class="px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 text-black shrink-0">
+      <button onclick="attendEvent('${evt.id}')" class="px-3 py-2 rounded-xl text-xs font-bold bg-black text-white shrink-0">
         RSVP
       </button>
     </div>
@@ -591,18 +590,18 @@ function flyToDistrict(district) {
 function filterDistrict(district, btn) {
   currentDistrictFilter = district;
   document.querySelectorAll('.district-pill').forEach(b => {
-    b.className = 'district-pill px-3.5 py-1.5 rounded-full glass text-neutral-400 hover:text-white transition shrink-0';
+    b.className = 'district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black transition shrink-0';
   });
-  btn.className = 'district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-950 font-bold shadow shrink-0';
+  btn.className = 'district-pill px-3.5 py-1.5 rounded-full bg-black text-white font-bold shadow-sm shrink-0 transition';
   renderEvents();
 }
 
 function filterCategory(cat, btn) {
   currentCategoryFilter = cat;
   document.querySelectorAll('.category-pill').forEach(b => {
-    b.className = 'category-pill px-3 py-1 rounded-lg glass text-neutral-400 hover:text-white shrink-0';
+    b.className = 'category-pill px-3 py-1 rounded-lg bg-white border border-neutral-200 text-neutral-600 hover:border-black hover:text-black shrink-0 transition';
   });
-  btn.className = 'category-pill px-3 py-1 rounded-lg bg-neutral-800 text-amber-400 font-semibold shrink-0';
+  btn.className = 'category-pill px-3 py-1 rounded-lg bg-black text-white font-semibold shrink-0 transition';
   renderEvents();
 }
 
@@ -611,19 +610,19 @@ function renderAuthHeader() {
   if (currentUserProfile) {
     area.innerHTML = `
       <div class="flex items-center gap-2">
-        <span class="text-xs text-neutral-300 font-semibold truncate max-w-[90px]">${currentUserProfile.display_name}</span>
-        <span class="text-[10px] px-2 py-0.5 rounded-full ${currentUserProfile.role === 'host' ? 'bg-amber-400 text-black font-bold' : 'bg-neutral-800 text-neutral-300'}">
+        <span class="text-xs text-black font-bold truncate max-w-[90px]">${currentUserProfile.display_name}</span>
+        <span class="text-[10px] px-2 py-0.5 rounded-full ${currentUserProfile.role === 'host' ? 'bg-black text-white font-bold' : 'bg-neutral-100 text-neutral-800 border border-neutral-300'}">
           ${currentUserProfile.role === 'host' ? 'Host' : 'Guest'}
         </span>
-        <button onclick="logout()" class="text-neutral-500 hover:text-rose-400 text-xs ml-0.5" title="Sign out">
+        <button onclick="logout()" class="text-neutral-400 hover:text-black text-xs ml-0.5" title="Sign out">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
         </button>
       </div>
     `;
   } else {
     area.innerHTML = `
-      <button onclick="openAuthModal()" class="text-xs px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-700 hover:border-amber-500 text-neutral-200 transition flex items-center gap-1.5">
-        <i data-lucide="log-in" class="w-3.5 h-3.5 text-amber-400"></i>
+      <button onclick="openAuthModal()" class="text-xs px-3.5 py-1.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition flex items-center gap-1.5">
+        <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
         <span>Sign In</span>
       </button>
     `;
