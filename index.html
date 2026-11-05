@@ -16,18 +16,16 @@
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-neutral-950 text-neutral-100 min-h-screen pb-24 selection:bg-amber-500 selection:text-black">
+<body class="bg-white text-neutral-900 min-h-screen pb-24 selection:bg-black selection:text-white antialiased">
 
   <!-- Header -->
-  <header class="sticky top-0 z-40 glass border-b border-neutral-800/80 px-4 py-3 flex items-center justify-between">
+  <header class="sticky top-0 z-40 glass border-b border-neutral-200 px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-2.5">
-      <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center font-extrabold text-black text-base shadow-lg shadow-amber-500/20">
-        N
-      </div>
+      <img src="Naoko_app.jpg" alt="Naoko Logo" class="w-8 h-8 object-contain">
       <div>
         <div class="flex items-center gap-1.5">
-          <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-neutral-100 via-neutral-300 to-neutral-400 bg-clip-text text-transparent">Naoko</span>
-          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">MILAN</span>
+          <span class="text-lg font-extrabold tracking-tight text-black">Naoko</span>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-800 border border-neutral-300">MILAN</span>
         </div>
       </div>
     </div>
@@ -41,149 +39,147 @@
     <div class="space-y-2.5">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-1.5">
-          <i data-lucide="map-pin" class="w-4 h-4 text-rose-500"></i>
-          <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-300">Milan Neighborhoods</h2>
+          <i data-lucide="map-pin" class="w-4 h-4 text-black"></i>
+          <h2 class="text-xs font-bold uppercase tracking-widest text-neutral-500">Milan Neighborhoods</h2>
         </div>
-        <span class="text-[11px] text-amber-400 font-mono" id="db-status-pill">Cloud Live</span>
+        <span class="text-[11px] text-neutral-500 font-mono" id="db-status-pill">Cloud Live</span>
       </div>
 
       <div class="flex gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
-        <button onclick="filterDistrict('All', this)" class="district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-950 font-bold shadow shrink-0">All</button>
-        <button onclick="filterDistrict('Porta Venezia & NoLo', this)" class="district-pill px-3.5 py-1.5 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Porta Venezia & NoLo</button>
-        <button onclick="filterDistrict('Navigli & Darsena', this)" class="district-pill px-3.5 py-1.5 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Navigli & Darsena</button>
-        <button onclick="filterDistrict('Isola & Garibaldi', this)" class="district-pill px-3.5 py-1.5 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Isola & Garibaldi</button>
-        <button onclick="filterDistrict('Brera & Centro', this)" class="district-pill px-3.5 py-1.5 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Brera & Centro</button>
-        <button onclick="filterDistrict('Tortona & P.ta Genova', this)" class="district-pill px-3.5 py-1.5 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Tortona & P.ta Genova</button>
-        <button onclick="filterDistrict('Lambrate', this)" class="district-pill px-3.5 py-1.5 rounded-full glass text-neutral-400 hover:text-white transition shrink-0">Lambrate</button>
+        <button onclick="filterDistrict('All', this)" class="district-pill px-3.5 py-1.5 rounded-full bg-black text-white font-bold shadow-sm shrink-0 transition">All</button>
+        <button onclick="filterDistrict('Porta Venezia & NoLo', this)" class="district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black transition shrink-0">Porta Venezia & NoLo</button>
+        <button onclick="filterDistrict('Navigli & Darsena', this)" class="district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black transition shrink-0">Navigli & Darsena</button>
+        <button onclick="filterDistrict('Isola & Garibaldi', this)" class="district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black transition shrink-0">Isola & Garibaldi</button>
+        <button onclick="filterDistrict('Brera & Centro', this)" class="district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black transition shrink-0">Brera & Centro</button>
+        <button onclick="filterDistrict('Tortona & P.ta Genova', this)" class="district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black transition shrink-0">Tortona & P.ta Genova</button>
+        <button onclick="filterDistrict('Lambrate', this)" class="district-pill px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black transition shrink-0">Lambrate</button>
       </div>
     </div>
 
     <!-- Category Filters -->
     <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
-      <button onclick="filterCategory('All', this)" class="category-pill px-3 py-1 rounded-lg bg-neutral-800 text-amber-400 font-semibold shrink-0">All Categories</button>
-      <button onclick="filterCategory('Cocktail Bar & Aperitivo', this)" class="category-pill px-3 py-1 rounded-lg glass text-neutral-400 hover:text-white shrink-0">Cocktail & Aperitivo</button>
-      <button onclick="filterCategory('Clubbing & DJ Set', this)" class="category-pill px-3 py-1 rounded-lg glass text-neutral-400 hover:text-white shrink-0">Club & DJ Set</button>
-      <button onclick="filterCategory('Live Music & Jazz', this)" class="category-pill px-3 py-1 rounded-lg glass text-neutral-400 hover:text-white shrink-0">Live & Jazz</button>
-      <button onclick="filterCategory('Exhibitions & Design', this)" class="category-pill px-3 py-1 rounded-lg glass text-neutral-400 hover:text-white shrink-0">Exhibitions & Design</button>
+      <button onclick="filterCategory('All', this)" class="category-pill px-3 py-1 rounded-lg bg-black text-white font-semibold shrink-0 transition">All Categories</button>
+      <button onclick="filterCategory('Cocktail Bar & Aperitivo', this)" class="category-pill px-3 py-1 rounded-lg bg-white border border-neutral-200 text-neutral-600 hover:border-black hover:text-black shrink-0 transition">Cocktail & Aperitivo</button>
+      <button onclick="filterCategory('Clubbing & DJ Set', this)" class="category-pill px-3 py-1 rounded-lg bg-white border border-neutral-200 text-neutral-600 hover:border-black hover:text-black shrink-0 transition">Club & DJ Set</button>
+      <button onclick="filterCategory('Live Music & Jazz', this)" class="category-pill px-3 py-1 rounded-lg bg-white border border-neutral-200 text-neutral-600 hover:border-black hover:text-black shrink-0 transition">Live & Jazz</button>
+      <button onclick="filterCategory('Exhibitions & Design', this)" class="category-pill px-3 py-1 rounded-lg bg-white border border-neutral-200 text-neutral-600 hover:border-black hover:text-black shrink-0 transition">Exhibitions & Design</button>
     </div>
 
     <!-- Host Banner -->
-    <div id="organizer-banner" class="glass p-4 rounded-2xl border-amber-500/30 bg-amber-950/10 space-y-2.5">
+    <div id="organizer-banner" class="p-4 rounded-2xl border border-neutral-200 bg-neutral-50 space-y-2.5">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <i data-lucide="store" class="w-4 h-4 text-amber-400"></i>
-          <span class="text-sm font-semibold text-neutral-200">Are you a venue or organizer in Milan?</span>
+          <i data-lucide="store" class="w-4 h-4 text-black"></i>
+          <span class="text-sm font-bold text-neutral-900">Are you a venue or organizer in Milan?</span>
         </div>
-        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-400/20 text-amber-300">Host Access</span>
+        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-neutral-200 text-neutral-800 font-semibold">Host Access</span>
       </div>
-      <button onclick="handleCreateEventClick()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 font-bold text-sm shadow hover:brightness-110 transition flex items-center justify-center gap-2">
+      <button onclick="handleCreateEventClick()" class="w-full py-2.5 rounded-xl bg-black text-white font-bold text-sm shadow-sm hover:bg-neutral-800 transition flex items-center justify-center gap-2">
         <i data-lucide="plus-circle" class="w-4 h-4"></i> Post Event in Milan
       </button>
     </div>
 
     <!-- Event Cards Container -->
-    <div class="space-y-5" id="events-container"></div>
+    <div class="space-y-6" id="events-container"></div>
   </main>
 
-<!-- VIEW 2: INTERACTIVE MAP -->
+  <!-- VIEW 2: INTERACTIVE MAP -->
   <main id="view-map" class="hidden fixed inset-0 top-[57px] bottom-[57px] z-10">
     <!-- Floating District Quick-Jump Bar on Map -->
     <div class="absolute top-3 left-3 right-3 z-[1000] flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-      <button onclick="flyToDistrict('All')" class="px-3 py-1.5 rounded-full glass text-xs font-bold text-amber-400 border border-amber-500/30 shadow-lg shrink-0">Reset View</button>
-      <button onclick="flyToDistrict('Porta Venezia & NoLo')" class="px-3 py-1.5 rounded-full glass text-xs font-medium text-neutral-200 hover:text-white shadow-lg shrink-0">Porta Venezia</button>
-      <button onclick="flyToDistrict('Navigli & Darsena')" class="px-3 py-1.5 rounded-full glass text-xs font-medium text-neutral-200 hover:text-white shadow-lg shrink-0">Navigli</button>
-      <button onclick="flyToDistrict('Isola & Garibaldi')" class="px-3 py-1.5 rounded-full glass text-xs font-medium text-neutral-200 hover:text-white shadow-lg shrink-0">Isola</button>
-      <button onclick="flyToDistrict('Brera & Centro')" class="px-3 py-1.5 rounded-full glass text-xs font-medium text-neutral-200 hover:text-white shadow-lg shrink-0">Brera</button>
-      <button onclick="flyToDistrict('Tortona & P.ta Genova')" class="px-3 py-1.5 rounded-full glass text-xs font-medium text-neutral-200 hover:text-white shadow-lg shrink-0">Tortona</button>
-      <button onclick="flyToDistrict('Lambrate')" class="px-3 py-1.5 rounded-full glass text-xs font-medium text-neutral-200 hover:text-white shadow-lg shrink-0">Lambrate</button>
+      <button onclick="flyToDistrict('All')" class="px-3 py-1.5 rounded-full bg-black text-white text-xs font-bold shadow-md shrink-0">Reset View</button>
+      <button onclick="flyToDistrict('Porta Venezia & NoLo')" class="px-3 py-1.5 rounded-full glass border border-neutral-300 text-xs font-medium text-neutral-800 hover:bg-white hover:text-black shadow-md shrink-0">Porta Venezia</button>
+      <button onclick="flyToDistrict('Navigli & Darsena')" class="px-3 py-1.5 rounded-full glass border border-neutral-300 text-xs font-medium text-neutral-800 hover:bg-white hover:text-black shadow-md shrink-0">Navigli</button>
+      <button onclick="flyToDistrict('Isola & Garibaldi')" class="px-3 py-1.5 rounded-full glass border border-neutral-300 text-xs font-medium text-neutral-800 hover:bg-white hover:text-black shadow-md shrink-0">Isola</button>
+      <button onclick="flyToDistrict('Brera & Centro')" class="px-3 py-1.5 rounded-full glass border border-neutral-300 text-xs font-medium text-neutral-800 hover:bg-white hover:text-black shadow-md shrink-0">Brera</button>
+      <button onclick="flyToDistrict('Tortona & P.ta Genova')" class="px-3 py-1.5 rounded-full glass border border-neutral-300 text-xs font-medium text-neutral-800 hover:bg-white hover:text-black shadow-md shrink-0">Tortona</button>
+      <button onclick="flyToDistrict('Lambrate')" class="px-3 py-1.5 rounded-full glass border border-neutral-300 text-xs font-medium text-neutral-800 hover:bg-white hover:text-black shadow-md shrink-0">Lambrate</button>
     </div>
 
     <!-- Map Container -->
     <div id="milano-map" class="w-full h-full"></div>
 
     <!-- Event Preview Card on Pin Click -->
-    <div id="map-preview-card" class="hidden absolute bottom-4 left-4 right-4 max-w-sm mx-auto glass p-3.5 rounded-2xl border border-neutral-700/80 shadow-2xl z-[1000]"></div>
+    <div id="map-preview-card" class="hidden absolute bottom-4 left-4 right-4 max-w-sm mx-auto glass p-3.5 rounded-2xl border border-neutral-200 shadow-2xl z-[1000]"></div>
   </main>
 
   <!-- VIEW 3: USER PROFILE PAGE -->
   <main id="view-profile" class="hidden max-w-md mx-auto px-4 pt-5 space-y-6">
-    <div class="glass p-6 rounded-3xl space-y-5 text-center">
-      <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 p-1">
+    <div class="bg-white border border-neutral-200 p-6 rounded-3xl space-y-5 text-center shadow-sm">
+      <div class="w-20 h-20 mx-auto rounded-full border-2 border-black p-1">
         <img id="profile-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Avatar" class="w-full h-full rounded-full object-cover">
       </div>
 
       <div class="space-y-1">
-        <h2 id="profile-name" class="text-xl font-bold">Guest User</h2>
-        <p id="profile-email" class="text-xs text-neutral-400">email@example.com</p>
+        <h2 id="profile-name" class="text-xl font-bold text-black">Guest User</h2>
+        <p id="profile-email" class="text-xs text-neutral-500">email@example.com</p>
         <div class="pt-2 flex justify-center">
-          <span id="profile-role-badge" class="text-xs px-3 py-1 rounded-full bg-neutral-800 text-amber-400 font-semibold">Guest</span>
+          <span id="profile-role-badge" class="text-xs px-3 py-1 rounded-full bg-neutral-100 text-black font-semibold">Guest</span>
         </div>
       </div>
 
-      <div class="border-t border-neutral-800 pt-4 text-left space-y-3 text-xs">
-        <div class="flex justify-between items-center py-2 border-b border-neutral-800/50">
-          <span class="text-neutral-400">Instagram Handle</span>
-          <span id="profile-instagram" class="font-mono text-neutral-200">Not connected</span>
+      <div class="border-t border-neutral-200 pt-4 text-left space-y-3 text-xs">
+        <div class="flex justify-between items-center py-2 border-b border-neutral-100">
+          <span class="text-neutral-500">Instagram Handle</span>
+          <span id="profile-instagram" class="font-mono text-black font-medium">Not connected</span>
         </div>
         <div class="flex justify-between items-center py-2">
-          <span class="text-neutral-400">Account Type</span>
-          <span id="profile-type-desc" class="text-neutral-200">Standard Participant</span>
+          <span class="text-neutral-500">Account Type</span>
+          <span id="profile-type-desc" class="text-black font-medium">Standard Participant</span>
         </div>
       </div>
 
-      <button onclick="logout()" class="w-full py-3 rounded-xl bg-neutral-800 hover:bg-rose-500/20 hover:text-rose-400 text-neutral-300 font-bold text-xs transition flex items-center justify-center gap-2">
+      <button onclick="logout()" class="w-full py-3 rounded-xl bg-neutral-100 hover:bg-black hover:text-white text-neutral-800 font-bold text-xs transition flex items-center justify-center gap-2">
         <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out from Naoko
       </button>
     </div>
   </main>
 
   <!-- MODAL: CLOUD AUTHENTICATION (SIGN UP & LOGIN) -->
-
-<!-- MODAL: CLOUD AUTHENTICATION (SIGN UP & LOGIN) -->
-  <div id="auth-modal" class="hidden fixed inset-0 z-50 glass bg-black/80 flex items-center justify-center p-4">
-    <div class="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white border border-neutral-200 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between">
-        <h3 id="auth-modal-title" class="text-lg font-bold">Join Naoko Milan</h3>
-        <button onclick="closeAuthModal()" class="text-neutral-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <h3 id="auth-modal-title" class="text-lg font-extrabold text-black">Join Naoko Milan</h3>
+        <button onclick="closeAuthModal()" class="text-neutral-400 hover:text-black"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <!-- Toggle Sign Up vs Log In -->
-      <div class="flex rounded-xl bg-neutral-950 p-1 border border-neutral-800 text-xs">
-        <button id="auth-tab-signup" onclick="switchAuthMode('signup')" class="flex-1 py-1.5 rounded-lg bg-neutral-800 text-white font-semibold transition">Sign Up</button>
-        <button id="auth-tab-signin" onclick="switchAuthMode('signin')" class="flex-1 py-1.5 rounded-lg text-neutral-400 hover:text-white font-semibold transition">Log In</button>
+      <div class="flex rounded-xl bg-neutral-100 p-1 border border-neutral-200 text-xs">
+        <button id="auth-tab-signup" onclick="switchAuthMode('signup')" class="flex-1 py-1.5 rounded-lg bg-black text-white font-semibold transition">Sign Up</button>
+        <button id="auth-tab-signin" onclick="switchAuthMode('signin')" class="flex-1 py-1.5 rounded-lg text-neutral-500 hover:text-black font-semibold transition">Log In</button>
       </div>
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="text-neutral-400 block mb-1">Email *</label>
-          <input type="email" id="auth-email" placeholder="name@example.com" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+          <label class="text-neutral-600 font-medium block mb-1">Email *</label>
+          <input type="email" id="auth-email" placeholder="name@example.com" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
         </div>
 
         <div>
-          <label class="text-neutral-400 block mb-1">Password *</label>
-          <input type="password" id="auth-password" placeholder="Min. 6 characters" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+          <label class="text-neutral-600 font-medium block mb-1">Password *</label>
+          <input type="password" id="auth-password" placeholder="Min. 6 characters" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
         </div>
 
         <!-- Extra Fields for Sign Up only -->
         <div id="auth-signup-fields" class="space-y-3">
           <div>
-            <label class="text-neutral-400 block mb-1">Display Name or Venue Name *</label>
-            <input type="text" id="auth-name" placeholder="e.g. Marco Rossi or Bar Basso" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-600 font-medium block mb-1">Display Name or Venue Name *</label>
+            <input type="text" id="auth-name" placeholder="e.g. Marco Rossi or Bar Basso" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
           </div>
 
           <div>
-            <label class="text-neutral-400 block mb-1">Instagram Handle (Optional)</label>
-            <input type="text" id="auth-instagram" placeholder="@handle" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-600 font-medium block mb-1">Instagram Handle (Optional)</label>
+            <input type="text" id="auth-instagram" placeholder="@handle" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
           </div>
 
           <div>
-            <label class="text-neutral-400 block mb-1">Select Role *</label>
+            <label class="text-neutral-600 font-medium block mb-1">Select Role *</label>
             <div class="grid grid-cols-2 gap-2">
-              <button type="button" id="role-btn-guest" onclick="selectRole('guest')" class="py-2.5 px-2 rounded-xl border border-amber-500 bg-amber-500/10 text-white font-semibold flex flex-col items-center gap-1 transition text-center">
+              <button type="button" id="role-btn-guest" onclick="selectRole('guest')" class="py-2.5 px-2 rounded-xl border-2 border-black bg-neutral-100 text-black font-bold flex flex-col items-center gap-1 transition text-center">
                 <i data-lucide="user" class="w-4 h-4"></i>
                 <span>Guest</span>
               </button>
-              <button type="button" id="role-btn-host" onclick="selectRole('host')" class="py-2.5 px-2 rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-400 font-semibold flex flex-col items-center gap-1 transition text-center">
+              <button type="button" id="role-btn-host" onclick="selectRole('host')" class="py-2.5 px-2 rounded-xl border border-neutral-200 bg-white text-neutral-400 font-semibold flex flex-col items-center gap-1 transition text-center">
                 <i data-lucide="store" class="w-4 h-4"></i>
                 <span>Venue / Host</span>
               </button>
@@ -192,33 +188,33 @@
         </div>
       </div>
 
-      <button id="auth-submit-btn" onclick="submitAuth()" class="w-full py-3 rounded-xl bg-amber-500 text-neutral-950 font-bold text-sm shadow hover:brightness-110 transition flex items-center justify-center gap-2">
+      <button id="auth-submit-btn" onclick="submitAuth()" class="w-full py-3 rounded-xl bg-black text-white font-bold text-sm shadow hover:bg-neutral-800 transition flex items-center justify-center gap-2">
         <i data-lucide="arrow-right" class="w-4 h-4"></i> Create Account
       </button>
     </div>
   </div>
 
   <!-- MODAL: CREATE EVENT -->
-  <div id="create-modal" class="hidden fixed inset-0 z-50 glass bg-black/80 flex items-end sm:items-center justify-center p-4">
-    <div class="bg-neutral-900 border border-neutral-800 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+  <div id="create-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+    <div class="bg-white border border-neutral-200 rounded-3xl p-5 w-full max-w-md space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-bold">New Gathering in Milan</h3>
-          <p class="text-[11px] text-amber-400">Posting as: <span id="host-name-label" class="font-semibold"></span></p>
+          <h3 class="text-lg font-extrabold text-black">New Gathering in Milan</h3>
+          <p class="text-[11px] text-neutral-500">Posting as: <span id="host-name-label" class="font-bold text-black"></span></p>
         </div>
-        <button onclick="closeModal()" class="text-neutral-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button onclick="closeModal()" class="text-neutral-400 hover:text-black"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="text-neutral-400 block mb-1">Event Title *</label>
-          <input type="text" id="new-title" placeholder="e.g. Rooftop Sunset Beats" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+          <label class="text-neutral-600 font-medium block mb-1">Event Title *</label>
+          <input type="text" id="new-title" placeholder="e.g. Rooftop Sunset Beats" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-neutral-400 block mb-1">District *</label>
-            <select id="new-district" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-600 font-medium block mb-1">District *</label>
+            <select id="new-district" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
               <option value="Porta Venezia & NoLo">Porta Venezia & NoLo</option>
               <option value="Navigli & Darsena">Navigli & Darsena</option>
               <option value="Isola & Garibaldi">Isola & Garibaldi</option>
@@ -228,8 +224,8 @@
             </select>
           </div>
           <div>
-            <label class="text-neutral-400 block mb-1">Category *</label>
-            <select id="new-category" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-600 font-medium block mb-1">Category *</label>
+            <select id="new-category" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
               <option value="Cocktail Bar & Aperitivo">Cocktail Bar & Aperitivo</option>
               <option value="Clubbing & DJ Set">Clubbing & DJ Set</option>
               <option value="Live Music & Jazz">Live Music & Jazz</option>
@@ -240,58 +236,59 @@
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-neutral-400 block mb-1">Venue & Address *</label>
-            <input type="text" id="new-location" placeholder="e.g. Via Lecco 4" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-600 font-medium block mb-1">Venue & Address *</label>
+            <input type="text" id="new-location" placeholder="e.g. Via Lecco 4" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
           </div>
           <div>
-            <label class="text-neutral-400 block mb-1">Nearest Metro</label>
-            <input type="text" id="new-metro" placeholder="e.g. M1 Porta Venezia" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-600 font-medium block mb-1">Nearest Metro</label>
+            <input type="text" id="new-metro" placeholder="e.g. M1 Porta Venezia" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-neutral-400 block mb-1">Date & Time *</label>
-            <input type="text" id="new-date" placeholder="Tonight • 9:00 PM" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-600 font-medium block mb-1">Date & Time *</label>
+            <input type="text" id="new-date" placeholder="Tonight • 9:00 PM" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
           </div>
           <div>
-            <label class="text-neutral-400 block mb-1">Instagram (@handle)</label>
-            <input type="text" id="new-ig" placeholder="@venue_milan" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            <label class="text-neutral-600 font-medium block mb-1">Instagram (@handle)</label>
+            <input type="text" id="new-ig" placeholder="@venue_milan" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
           </div>
         </div>
 
         <div>
-          <label class="text-neutral-400 block mb-1">Cover Image URL</label>
-          <input type="text" id="new-cover" value="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+          <label class="text-neutral-600 font-medium block mb-1">Cover Image URL</label>
+          <input type="text" id="new-cover" value="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black">
         </div>
 
         <div>
-          <label class="text-neutral-400 block mb-1">Description</label>
-          <textarea id="new-desc" rows="2" placeholder="Music style, reservations, entry policy..." class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
+          <label class="text-neutral-600 font-medium block mb-1">Description</label>
+          <textarea id="new-desc" rows="2" placeholder="Music style, reservations, entry policy..." class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-2 text-black focus:outline-none focus:border-black"></textarea>
         </div>
       </div>
 
-      <button id="btn-publish-submit" onclick="publishEvent()" class="w-full py-3 rounded-xl bg-amber-500 text-neutral-950 font-bold text-sm shadow hover:brightness-110 transition flex items-center justify-center gap-2">
+      <button id="btn-publish-submit" onclick="publishEvent()" class="w-full py-3 rounded-xl bg-black text-white font-bold text-sm shadow hover:bg-neutral-800 transition flex items-center justify-center gap-2">
         <i data-lucide="check" class="w-4 h-4"></i> Publish to Milan Feed
       </button>
     </div>
   </div>
-  
-<!-- Bottom Nav -->
-  <nav class="fixed bottom-0 left-0 right-0 glass border-t border-neutral-800 px-6 py-2.5 flex justify-around items-center max-w-md mx-auto z-40">
-    <button id="nav-btn-feed" onclick="switchView('feed')" class="flex flex-col items-center gap-1 text-amber-400">
+
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-0 right-0 glass border-t border-neutral-200 px-6 py-2.5 flex justify-around items-center max-w-md mx-auto z-40">
+    <button id="nav-btn-feed" onclick="switchView('feed')" class="flex flex-col items-center gap-1 text-black">
       <i data-lucide="compass" class="w-5 h-5"></i>
-      <span class="text-[10px] font-semibold">Feed</span>
+      <span class="text-[10px] font-bold">Feed</span>
     </button>
-    <button id="nav-btn-map" onclick="switchView('map')" class="flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200">
+    <button id="nav-btn-map" onclick="switchView('map')" class="flex flex-col items-center gap-1 text-neutral-400 hover:text-black">
       <i data-lucide="map" class="w-5 h-5"></i>
       <span class="text-[10px] font-medium">Map</span>
     </button>
-    <button id="nav-btn-profile" onclick="switchView('profile')" class="flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-200">
+    <button id="nav-btn-profile" onclick="switchView('profile')" class="flex flex-col items-center gap-1 text-neutral-400 hover:text-black">
       <i data-lucide="user" class="w-5 h-5"></i>
       <span class="text-[10px] font-medium">Profile</span>
     </button>
   </nav>
+
   <!-- External Script -->
   <script src="app.js"></script>
 </body>
