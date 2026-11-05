@@ -5,7 +5,6 @@ const supabaseClient = (typeof window.supabase !== 'undefined' && window.supabas
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) 
   : null;
 
-// Milan Neighborhood Coordinates
 const DISTRICT_COORDS = {
   'Porta Venezia & NoLo': [45.4746, 9.2054],
   'Navigli & Darsena': [45.4515, 9.1765],
@@ -15,7 +14,8 @@ const DISTRICT_COORDS = {
   'Lambrate': [45.4842, 9.2384]
 };
 
-let currentUser = JSON.parse(localStorage.getItem('naoko_user')) || null;
+let currentUserProfile = null; // Profilo Supabase attivo
+let authMode = 'signup'; // 'signup' oppure 'signin'
 let selectedAuthRole = 'guest';
 let currentDistrictFilter = 'All';
 let currentCategoryFilter = 'All';
@@ -23,13 +23,50 @@ let mapInstance = null;
 let mapMarkers = [];
 let events = [];
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderAuthHeader();
-  fetchEventsFromCloud();
+document.addEventListener("DOMContentLoaded", async () => {
+  await initSession();
+  await fetchEventsFromCloud();
   if (window.lucide) lucide.createIcons();
 });
 
-// 2. Fetch Eventi e Partecipanti solo dal Cloud
+// 1. Sessione & Profilo Reale da Supabase
+async function initSession() {
+  if (!supabaseClient) return;
+
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session && session.user) {
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile) currentUserProfile = profile;
+    }
+
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (session && session.user) {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        currentUserProfile = profile;
+      } else {
+        currentUserProfile = null;
+      }
+      renderAuthHeader();
+      renderEvents();
+    });
+  } catch (err) {
+    console.warn("Session check error:", err);
+  }
+
+  renderAuthHeader();
+}
+
+// 2. Fetch Eventi & Partecipanti
 async function fetchEventsFromCloud() {
   const statusPill = document.getElementById('db-status-pill');
   if (statusPill) statusPill.innerText = "Syncing...";
@@ -44,7 +81,6 @@ async function fetchEventsFromCloud() {
 
     if (error) throw error;
 
-    // Recupera RSVP per tutti gli eventi reali
     const { data: attendeesData } = await supabaseClient
       .from('event_attendees')
       .select('event_id, user_id, profiles(display_name, avatar_url, instagram_handle)');
@@ -84,13 +120,134 @@ async function fetchEventsFromCloud() {
   } catch (err) {
     console.error("Fetch error:", err);
     if (statusPill) statusPill.innerText = "Offline";
-    // Nessun evento fittizio in caso di errore o feed vuoto
     events = [];
     renderEvents();
   }
 }
 
-// 2. Publish Event to Cloud
+// 3. Gestione Modalità Autenticazione (Sign Up vs Log In)
+function switchAuthMode(mode) {
+  authMode = mode;
+  const tabSignup = document.getElementById('auth-tab-signup');
+  const tabSignin = document.getElementById('auth-tab-signin');
+  const signupFields = document.getElementById('auth-signup-fields');
+  const submitBtn = document.getElementById('auth-submit-btn');
+  const title = document.getElementById('auth-modal-title');
+
+  if (mode === 'signup') {
+    tabSignup.className = "flex-1 py-1.5 rounded-lg bg-neutral-800 text-white font-semibold transition";
+    tabSignin.className = "flex-1 py-1.5 rounded-lg text-neutral-400 hover:text-white font-semibold transition";
+    signupFields.classList.remove('hidden');
+    submitBtn.innerHTML = `<i data-lucide="arrow-right" class="w-4 h-4"></i> Create Account`;
+    title.innerText = "Join Naoko Milan";
+  } else {
+    tabSignin.className = "flex-1 py-1.5 rounded-lg bg-neutral-800 text-white font-semibold transition";
+    tabSignup.className = "flex-1 py-1.5 rounded-lg text-neutral-400 hover:text-white font-semibold transition";
+    signupFields.classList.add('hidden');
+    submitBtn.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Log In`;
+    title.innerText = "Welcome Back";
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+async function submitAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const submitBtn = document.getElementById('auth-submit-btn');
+
+  if (!email || !password) {
+    alert("Please provide both email and password.");
+    return;
+  }
+
+  submitBtn.disabled = true;
+
+  try {
+    if (authMode === 'signup') {
+      const name = document.getElementById('auth-name').value.trim();
+      const instagram = document.getElementById('auth-instagram').value.trim();
+
+      if (!name) {
+        alert("Please enter your name or venue title.");
+        submitBtn.disabled = false;
+        return;
+      }
+
+      const { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password });
+      if (authError) throw authError;
+
+      if (authData.user) {
+        const { error: profileError } = await supabaseClient
+          .from('profiles')
+          .insert([{
+            id: authData.user.id,
+            email: email,
+            display_name: name,
+            role: selectedAuthRole,
+            instagram_handle: instagram || null
+          }]);
+
+        if (profileError) throw profileError;
+        alert(`Account created successfully as ${selectedAuthRole === 'host' ? 'Venue / Host' : 'Guest'}!`);
+      }
+    } else {
+      const { error: loginError } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (loginError) throw loginError;
+    }
+
+    closeAuthModal();
+  } catch (err) {
+    alert("Authentication error: " + err.message);
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+async function logout() {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  currentUserProfile = null;
+  renderAuthHeader();
+  renderEvents();
+}
+
+// 4. Selezione Ruolo (Guest vs Host con fix illuminazione)
+function selectRole(role) {
+  selectedAuthRole = role;
+  const guestBtn = document.getElementById('role-btn-guest');
+  const hostBtn = document.getElementById('role-btn-host');
+
+  const activeClasses = "py-2.5 px-2 rounded-xl border border-amber-500 bg-amber-500/10 text-white font-semibold flex flex-col items-center gap-1 transition text-center";
+  const inactiveClasses = "py-2.5 px-2 rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-400 font-semibold flex flex-col items-center gap-1 transition text-center";
+
+  if (role === 'guest') {
+    guestBtn.className = activeClasses;
+    hostBtn.className = inactiveClasses;
+  } else {
+    hostBtn.className = activeClasses;
+    guestBtn.className = inactiveClasses;
+  }
+}
+
+// 5. Geocoding Indirizzi Reali di Milano
+async function geocodeMilanAddress(address, fallbackDistrict) {
+  const baseCoords = DISTRICT_COORDS[fallbackDistrict] || [45.4642, 9.1900];
+  try {
+    const query = encodeURIComponent(`${address}, Milano, Italy`);
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
+    const results = await response.json();
+    if (results && results.length > 0) {
+      return [parseFloat(results[0].lat), parseFloat(results[0].lon)];
+    }
+  } catch (err) {
+    console.warn("Geocoding fallback used:", err);
+  }
+  return [
+    baseCoords[0] + (Math.random() - 0.5) * 0.004,
+    baseCoords[1] + (Math.random() - 0.5) * 0.004
+  ];
+}
+
+// 6. Pubblicazione Evento Cloud
 async function publishEvent() {
   const title = document.getElementById('new-title').value.trim();
   const district = document.getElementById('new-district').value;
@@ -104,35 +261,32 @@ async function publishEvent() {
   const submitBtn = document.getElementById('btn-publish-submit');
 
   if (!title || !location || !date) {
-    alert("Please fill in the required fields: Title, Venue/Address, and Date/Time.");
+    alert("Please fill in Title, Venue/Address, and Date.");
     return;
   }
 
-  const baseCoords = DISTRICT_COORDS[district] || [45.4642, 9.1900];
-  const finalLat = baseCoords[0] + (Math.random() - 0.5) * 0.008;
-  const finalLng = baseCoords[1] + (Math.random() - 0.5) * 0.008;
-
   submitBtn.disabled = true;
-  submitBtn.innerText = "Uploading to Cloud...";
+  submitBtn.innerText = "Locating address & publishing...";
 
   try {
-    const { data, error } = await supabaseClient
+    const [finalLat, finalLng] = await geocodeMilanAddress(location, district);
+
+    const { error } = await supabaseClient
       .from('events')
       .insert([{
-        title: title,
-        district: district,
+        title,
+        district,
         location_name: location,
-        metro: metro,
+        metro,
         event_date: date,
-        category: category,
-        instagram: ig,
+        category,
+        instagram: ig || (currentUserProfile ? currentUserProfile.instagram_handle : null),
         cover_url: cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
         description: desc,
-        host_name: currentUser ? currentUser.name : 'Verified Host',
+        host_name: currentUserProfile ? currentUserProfile.display_name : 'Verified Host',
         lat: finalLat,
         lng: finalLng
-      }])
-      .select();
+      }]);
 
     if (error) throw error;
 
@@ -144,18 +298,17 @@ async function publishEvent() {
     document.getElementById('new-desc').value = '';
 
     await fetchEventsFromCloud();
-    alert("Gathering published live on Supabase! Visible to everyone.");
+    alert("Gathering pinned on the Milan map & published live!");
 
   } catch (err) {
-    alert("Supabase error: " + err.message);
-    console.error(err);
+    alert("Error publishing event: " + err.message);
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerText = "Publish to Milan Feed";
   }
 }
 
-// 3. Render Events Feed
+// 7. Render Feed ed Eventi
 function renderEvents() {
   const container = document.getElementById('events-container');
   const filtered = events.filter(e => {
@@ -177,7 +330,7 @@ function renderEvents() {
   }
 
   container.innerHTML = filtered.map(evt => {
-    const isUserGoing = currentUser && evt.attendees && evt.attendees.some(a => a.name === currentUser.name);
+    const isUserGoing = currentUserProfile && evt.attendees.some(a => a.userId === currentUserProfile.id);
 
     return `
       <div class="glass rounded-3xl overflow-hidden shadow-2xl transition hover:border-neutral-700">
@@ -213,12 +366,12 @@ function renderEvents() {
           <div class="border-t border-neutral-800/80 pt-3 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="flex -space-x-2 overflow-hidden">
-                ${evt.attendees && evt.attendees.length > 0 ? evt.attendees.slice(0, 3).map(a => `
-                  <img class="inline-block h-7 w-7 rounded-full ring-2 ring-neutral-900 object-cover" src="${a.avatar}" alt="${a.name}">
+                ${evt.attendees.length > 0 ? evt.attendees.slice(0, 3).map(a => `
+                  <img title="${a.name} ${a.instagram ? '(' + a.instagram + ')' : ''}" class="inline-block h-7 w-7 rounded-full ring-2 ring-neutral-900 object-cover cursor-pointer" src="${a.avatar}" alt="${a.name}">
                 `).join('') : '<span class="text-xs text-neutral-500">No RSVPs yet</span>'}
               </div>
               <span class="text-xs font-medium text-neutral-400">
-                ${evt.attendees && evt.attendees.length > 0 ? `+${evt.attendees.length} going` : 'Be the first'}
+                ${evt.attendees.length > 0 ? `+${evt.attendees.length} going` : 'Be the first'}
               </span>
             </div>
 
@@ -235,9 +388,9 @@ function renderEvents() {
   if (window.lucide) lucide.createIcons();
 }
 
-// 4. RSVP Handling
-function attendEvent(eventId) {
-  if (!currentUser) {
+// 8. RSVP Gestione Presenze Cloud
+async function attendEvent(eventId) {
+  if (!currentUserProfile) {
     alert("Please sign in or create an account to RSVP!");
     openAuthModal();
     return;
@@ -246,15 +399,34 @@ function attendEvent(eventId) {
   const evt = events.find(e => e.id === eventId);
   if (!evt) return;
 
-  if (!evt.attendees) evt.attendees = [];
-  const alreadyGoing = evt.attendees.some(a => a.name === currentUser.name);
+  const existingIndex = evt.attendees.findIndex(a => a.userId === currentUserProfile.id);
 
-  if (alreadyGoing) {
-    evt.attendees = evt.attendees.filter(a => a.name !== currentUser.name);
+  if (existingIndex > -1) {
+    await supabaseClient
+      .from('event_attendees')
+      .delete()
+      .eq('event_id', eventId)
+      .eq('user_id', currentUserProfile.id);
+
+    evt.attendees.splice(existingIndex, 1);
   } else {
+    const { error } = await supabaseClient
+      .from('event_attendees')
+      .insert([{
+        event_id: eventId,
+        user_id: currentUserProfile.id
+      }]);
+
+    if (error) {
+      console.error("RSVP error:", error);
+      return;
+    }
+
     evt.attendees.push({
-      name: currentUser.name,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80'
+      userId: currentUserProfile.id,
+      name: currentUserProfile.display_name,
+      avatar: currentUserProfile.avatar_url,
+      instagram: currentUserProfile.instagram_handle
     });
   }
 
@@ -262,7 +434,7 @@ function attendEvent(eventId) {
   if (mapInstance) showMapPreview(evt);
 }
 
-// 5. Views & Map
+// 9. Views & Mappa
 function switchView(view) {
   const feedView = document.getElementById('view-feed');
   const mapView = document.getElementById('view-map');
@@ -286,10 +458,8 @@ function switchView(view) {
 
 function initOrResizeMap() {
   if (!mapInstance && typeof L !== 'undefined') {
-    // Center on Milan (Duomo)
     mapInstance = L.map('milano-map', { zoomControl: false }).setView([45.4654, 9.1859], 13);
     
-    // Free OpenStreetMap Tiles (No API Key required)
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19
@@ -348,7 +518,19 @@ function showMapPreview(evt) {
   card.classList.remove('hidden');
 }
 
-// 6. Filters & Authentication
+function flyToDistrict(district) {
+  if (!mapInstance) return;
+  const previewCard = document.getElementById('map-preview-card');
+  if (previewCard) previewCard.classList.add('hidden');
+
+  if (district === 'All') {
+    mapInstance.flyTo([45.4654, 9.1859], 13, { duration: 1.2 });
+  } else if (DISTRICT_COORDS[district]) {
+    mapInstance.flyTo(DISTRICT_COORDS[district], 15, { duration: 1.2 });
+  }
+}
+
+// 10. Filtri & Header
 function filterDistrict(district, btn) {
   currentDistrictFilter = district;
   document.querySelectorAll('.district-pill').forEach(b => {
@@ -369,12 +551,12 @@ function filterCategory(cat, btn) {
 
 function renderAuthHeader() {
   const area = document.getElementById('auth-header-area');
-  if (currentUser) {
+  if (currentUserProfile) {
     area.innerHTML = `
       <div class="flex items-center gap-2">
-        <span class="text-xs text-neutral-300 font-semibold truncate max-w-[90px]">${currentUser.name}</span>
-        <span class="text-[10px] px-2 py-0.5 rounded-full ${currentUser.role === 'host' ? 'bg-amber-400 text-black font-bold' : 'bg-neutral-800 text-neutral-300'}">
-          ${currentUser.role === 'host' ? 'Host' : 'Guest'}
+        <span class="text-xs text-neutral-300 font-semibold truncate max-w-[90px]">${currentUserProfile.display_name}</span>
+        <span class="text-[10px] px-2 py-0.5 rounded-full ${currentUserProfile.role === 'host' ? 'bg-amber-400 text-black font-bold' : 'bg-neutral-800 text-neutral-300'}">
+          ${currentUserProfile.role === 'host' ? 'Host' : 'Guest'}
         </span>
         <button onclick="logout()" class="text-neutral-500 hover:text-rose-400 text-xs ml-0.5" title="Sign out">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
@@ -393,17 +575,17 @@ function renderAuthHeader() {
 }
 
 function handleCreateEventClick() {
-  if (!currentUser) {
+  if (!currentUserProfile) {
     alert("An account is required to host gatherings. Sign up as a Venue/Host!");
     openAuthModal();
     selectRole('host');
     return;
   }
-  if (currentUser.role !== 'host') {
-    alert(`You are currently signed in as a Guest (${currentUser.name}). Only verified Venue / Host accounts can post gatherings.`);
+  if (currentUserProfile.role !== 'host') {
+    alert(`You are currently signed in as a Guest (${currentUserProfile.display_name}). Only verified Venue / Host accounts can post gatherings.`);
     return;
   }
-  document.getElementById('host-name-label').innerText = currentUser.name;
+  document.getElementById('host-name-label').innerText = currentUserProfile.display_name;
   document.getElementById('create-modal').classList.remove('hidden');
   if (window.lucide) lucide.createIcons();
 }
@@ -412,49 +594,10 @@ function openAuthModal() { document.getElementById('auth-modal').classList.remov
 function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 function closeModal() { document.getElementById('create-modal').classList.add('hidden'); }
 
-function selectRole(role) {
-  selectedAuthRole = role;
-  const guestBtn = document.getElementById('role-btn-guest');
-  const hostBtn = document.getElementById('role-btn-host');
-
-  if (role === 'guest') {
-    guestBtn.className = "py-2.5 px-2 rounded-xl border border-amber-500 bg-amber-500/10 text-white font-semibold flex flex-col items-center gap-1 transition text-center";
-    guestBtn.querySelector('i').className = "w-4 h-4 text-amber-400";
-    hostBtn.className = "py-2.5 px-2 rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-400 font-semibold flex flex-col items-center gap-1 transition text-center";
-    hostBtn.querySelector('i').className = "w-4 h-4";
-  } else {
-    hostBtn.className = "py-2.5 px-2 rounded-xl border border-amber-500 bg-amber-500/10 text-white font-semibold flex flex-col items-center gap-1 transition text-center";
-    hostBtn.querySelector('i').className = "w-4 h-4 text-amber-400";
-    guestBtn.className = "py-2.5 px-2 rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-400 font-semibold flex flex-col items-center gap-1 transition text-center";
-    guestBtn.querySelector('i').className = "w-4 h-4";
-  }
-  if (window.lucide) lucide.createIcons();
-}
-
-function completeAuth() {
-  const name = document.getElementById('auth-name').value.trim();
-  if (!name) {
-    alert("Please enter a name or venue title.");
-    return;
-  }
-  currentUser = { name, role: selectedAuthRole };
-  localStorage.setItem('naoko_user', JSON.stringify(currentUser));
-  closeAuthModal();
-  renderAuthHeader();
-  renderEvents();
-}
-
-function logout() {
-  currentUser = null;
-  localStorage.removeItem('naoko_user');
-  renderAuthHeader();
-  renderEvents();
-}
-
 function showProfile() {
-  if (!currentUser) {
+  if (!currentUserProfile) {
     openAuthModal();
   } else {
-    alert(`Naoko Profile:\nName: ${currentUser.name}\nRole: ${currentUser.role === 'host' ? 'Host / Venue' : 'Guest'}`);
+    alert(`Naoko Profile:\nName: ${currentUserProfile.display_name}\nEmail: ${currentUserProfile.email}\nInstagram: ${currentUserProfile.instagram_handle || 'Not connected'}\nRole: ${currentUserProfile.role === 'host' ? 'Host / Venue' : 'Guest'}`);
   }
 }
