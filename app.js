@@ -286,11 +286,15 @@ function switchView(view) {
 
 function initOrResizeMap() {
   if (!mapInstance && typeof L !== 'undefined') {
+    // Center on Milan (Duomo)
     mapInstance = L.map('milano-map', { zoomControl: false }).setView([45.4654, 9.1859], 13);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
+    
+    // Free OpenStreetMap Tiles (No API Key required)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19
     }).addTo(mapInstance);
+    
     L.control.zoom({ position: 'topright' }).addTo(mapInstance);
   }
 
