@@ -29,54 +29,63 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) lucide.createIcons();
 });
 
-// 1. Fetch Events from Supabase
+// 2. Fetch Eventi e Partecipanti solo dal Cloud
 async function fetchEventsFromCloud() {
-  const container = document.getElementById('events-container');
   const statusPill = document.getElementById('db-status-pill');
   if (statusPill) statusPill.innerText = "Syncing...";
 
-  if (!supabaseClient) {
-    console.error("Supabase client not initialized");
-    return;
-  }
+  if (!supabaseClient) return;
 
   try {
-    const { data, error } = await supabaseClient
+    const { data: eventsData, error } = await supabaseClient
       .from('events')
       .select('*')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    if (data && data.length > 0) {
-      events = data.map(dbEvt => ({
-        id: dbEvt.id,
-        title: dbEvt.title,
-        district: dbEvt.district || 'Porta Venezia & NoLo',
-        location: dbEvt.location_name || 'Milan',
-        metro: dbEvt.metro || '',
-        date: dbEvt.event_date || 'Tonight',
-        category: dbEvt.category || 'Cocktail Bar & Aperitivo',
-        cover: dbEvt.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
-        description: dbEvt.description || '',
-        hostName: dbEvt.host_name || 'Verified Host',
-        instagram: dbEvt.instagram || '',
-        lat: dbEvt.lat || (DISTRICT_COORDS[dbEvt.district] ? DISTRICT_COORDS[dbEvt.district][0] : 45.4642),
-        lng: dbEvt.lng || (DISTRICT_COORDS[dbEvt.district] ? DISTRICT_COORDS[dbEvt.district][1] : 9.1900),
-        attendees: []
-      }));
-    } else {
-      events = [];
-    }
+    // Recupera RSVP per tutti gli eventi reali
+    const { data: attendeesData } = await supabaseClient
+      .from('event_attendees')
+      .select('event_id, user_id, profiles(display_name, avatar_url, instagram_handle)');
+
+    events = (eventsData || []).map(evt => {
+      const eventAttendees = (attendeesData || [])
+        .filter(a => a.event_id === evt.id)
+        .map(a => ({
+          userId: a.user_id,
+          name: a.profiles ? a.profiles.display_name : 'Guest',
+          avatar: a.profiles ? a.profiles.avatar_url : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+          instagram: a.profiles ? a.profiles.instagram_handle : ''
+        }));
+
+      return {
+        id: evt.id,
+        title: evt.title,
+        district: evt.district || 'Porta Venezia & NoLo',
+        location: evt.location_name || 'Milan',
+        metro: evt.metro || '',
+        date: evt.event_date || 'Tonight',
+        category: evt.category || 'Cocktail Bar & Aperitivo',
+        cover: evt.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
+        description: evt.description || '',
+        hostName: evt.host_name || 'Verified Host',
+        instagram: evt.instagram || '',
+        lat: evt.lat || (DISTRICT_COORDS[evt.district] ? DISTRICT_COORDS[evt.district][0] : 45.4642),
+        lng: evt.lng || (DISTRICT_COORDS[evt.district] ? DISTRICT_COORDS[evt.district][1] : 9.1900),
+        attendees: eventAttendees
+      };
+    });
 
     if (statusPill) statusPill.innerText = "Cloud Live";
     renderEvents();
     if (mapInstance) updateMapMarkers();
 
   } catch (err) {
-    console.error("Supabase fetch error:", err);
-    if (statusPill) statusPill.innerText = "Offline Cache";
-    events = JSON.parse(localStorage.getItem('naoko_milano_events')) || [];
+    console.error("Fetch error:", err);
+    if (statusPill) statusPill.innerText = "Offline";
+    // Nessun evento fittizio in caso di errore o feed vuoto
+    events = [];
     renderEvents();
   }
 }
