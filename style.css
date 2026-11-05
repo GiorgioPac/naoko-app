@@ -35,3 +35,11 @@ body {
 .leaflet-popup-tip {
   background: #171717 !important;
 }
+
+/* Trasforma la mappa standard OpenStreetMap in Dark Mode elegante senza API Key */
+.leaflet-layer,
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out,
+.leaflet-control-attribution {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
